@@ -1,0 +1,5 @@
+[2026-08-17T17:05:40.205Z] 5:05:40 PM [vite] changed tsconfig file detected: /home/ubuntu/correa-controle-interno/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2026-08-17T17:05:40.207Z] 5:05:40 PM [vite] vite.config.ts changed, restarting server...
+[2026-08-17T17:05:40.229Z] 5:05:40 PM [vite] server restarted.
+[2026-08-17T17:05:40.229Z] ➜  Local:   http://localhost:5173/
+[2026-08-17T17:05:40.229Z] ➜  Network: http://169.254.0.21:5173/
