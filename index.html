@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#66715B">
+  <title>Corrêa Controle Interno</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"><img src="assets/logo.png" alt="Logo Corrêa"></div><div><strong>Corrêa</strong><small>CONTROLE INTERNO</small></div></div>
+    <p class="eyebrow sidebar-label">Navegação</p>
+    <nav id="department-nav" class="department-nav"></nav>
+    <div class="sidebar-focus"><div class="focus-title"><span>✦</span> Fechamento em foco</div><p>Acompanhe as tarefas mais próximas do prazo em uma única visão.</p><button data-action="toast" data-message="O filtro de fechamento será configurado na próxima etapa.">Ver pendências ↗</button></div>
+    <div class="profile"><div class="avatar">IH</div><div><strong>Ihara</strong><small>Administradora</small></div><span>⚙</span></div>
+  </aside>
+
+  <main class="app-main">
+    <header class="topbar"><div class="topbar-title"><div class="mobile-mark"><img src="assets/logo.png" alt="Corrêa"></div><div><p class="eyebrow" id="date-label">Segunda-feira, 17 de agosto de 2026</p><h1 id="page-title">Bom dia, Ihara</h1></div></div><div class="user-area"><button class="icon-button" data-action="toast" data-message="Você está em dia com as notificações críticas.">♧<i></i></button><span class="divider"></span><div class="avatar">IH</div><div class="user-copy"><strong>Ihara</strong><small>Administradora</small></div><span class="chevron">⌄</span></div></header>
+    <div class="content">
+      <div class="today-strip"><strong>PAINEL DE HOJE</strong><span><b></b> 07 pontos de atenção</span><span>▦ 02 vencem hoje</span><span>☑ 86% das rotinas em dia</span></div>
+      <div id="page-content"></div>
+    </div>
+  </main>
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+  <script src="script.js"></script>
+</body>
+</html>
