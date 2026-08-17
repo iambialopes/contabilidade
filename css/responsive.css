@@ -8,8 +8,10 @@
 
 .menu-toggle, .menu-close, .mobile-overlay { display: none; }
 
-@media (max-width: 760px) {
-  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border-radius: 10px; background: var(--olive-soft); color: var(--olive-dark); font-size: 20px; }
+@media (max-width: 1100px) {
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: auto; min-width: 76px; height: 40px; padding: 0 12px; border: 1px solid #CBD6C1; border-radius: 10px; background: var(--olive-soft); color: var(--olive-dark); font-size: 16px; font-weight: 800; }
+  .menu-bars { font-size: 20px; line-height: 1; }
+  .menu-toggle-label { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
   .menu-close { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin-left: auto; border-radius: 9px; background: rgba(255,255,255,.12); color: #F7F5EF; font-size: 24px; line-height: 1; }
   .mobile-overlay { position: fixed; z-index: 4; inset: 0; display: block; visibility: hidden; background: rgba(35, 44, 32, .42); opacity: 0; transition: opacity .2s var(--ease), visibility .2s var(--ease); }
   body.menu-open { overflow: hidden; }
@@ -26,6 +28,9 @@
   .topbar { position: relative; z-index: 3; }
   .topbar { height: 78px; padding: 0 16px; }
   .mobile-mark { display: flex; }
+  .topbar-title { min-width: 0; }
+  .topbar-title > div:last-child { min-width: 0; }
+  .topbar-title h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .topbar h1 { font-size: 25px; }
   .user-copy, .divider, .chevron { display: none; }
   .content { padding: 24px 16px 42px; }
