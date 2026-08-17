@@ -7,6 +7,9 @@ const navigation = document.querySelector('#department-nav');
 const pageTitle = document.querySelector('#page-title');
 const modalRoot = document.querySelector('#modal-root');
 const toastRoot = document.querySelector('#toast-root');
+const menuToggle = document.querySelector('#menu-toggle');
+const menuClose = document.querySelector('#menu-close');
+const mobileOverlay = document.querySelector('#mobile-overlay');
 
 function renderApp() {
   renderPageTitle();
@@ -63,9 +66,29 @@ function getSelectedClient() {
 
 function bindNavigation() {
   document.querySelectorAll('[data-page]').forEach((button) => {
-    button.addEventListener('click', () => state.setPage(button.dataset.page));
+    button.addEventListener('click', () => {
+      state.setPage(button.dataset.page);
+      closeMobileMenu();
+    });
   });
 }
+
+function openMobileMenu() {
+  document.body.classList.add('menu-open');
+  menuToggle?.setAttribute('aria-expanded', 'true');
+}
+
+function closeMobileMenu() {
+  document.body.classList.remove('menu-open');
+  menuToggle?.setAttribute('aria-expanded', 'false');
+}
+
+menuToggle?.addEventListener('click', openMobileMenu);
+menuClose?.addEventListener('click', closeMobileMenu);
+mobileOverlay?.addEventListener('click', closeMobileMenu);
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMobileMenu();
+});
 
 function bindActions() {
   document.querySelectorAll('[data-action="toast"]').forEach((element) => {
