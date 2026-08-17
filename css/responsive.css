@@ -1,0 +1,33 @@
+/* Corrêa Controle Interno — Responsividade. */
+@media (max-width: 1100px) {
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .routine-grid { grid-template-columns: repeat(2, 1fr); }
+  .dept-hero .client-context { position: static; max-width: 260px; margin-top: 20px; }
+  .content { padding-right: 24px; padding-left: 24px; }
+}
+
+@media (max-width: 760px) {
+  .sidebar { position: static; width: auto; padding: 16px; }
+  .brand { padding: 0 0 17px; }
+  .sidebar-label, .department-nav, .sidebar-focus, .profile { display: none; }
+  .app-main { margin-left: 0; }
+  .topbar { height: 78px; padding: 0 16px; }
+  .mobile-mark { display: flex; }
+  .topbar h1 { font-size: 25px; }
+  .user-copy, .divider, .chevron { display: none; }
+  .content { padding: 24px 16px 42px; }
+  .today-strip { gap: 12px; }
+  .paper-card { padding: 23px; }
+  .paper-card::after { display: none; }
+  .hero-copy h2 { font-size: 32px; }
+  .summary-grid, .lower-grid { grid-template-columns: 1fr; }
+  .routine-grid { grid-template-columns: 1fr; }
+  .section-heading, .routine-heading { align-items: start; flex-direction: column; }
+  .table-tools { align-items: stretch; flex-direction: column; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-field.wide { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
