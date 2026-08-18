@@ -98,8 +98,9 @@
 .form-field { display: flex; flex-direction: column; gap: 6px; }
 .form-field.wide { grid-column: span 2; }
 .form-field label { color: #8C9489; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.form-field input { height: 42px; padding: 0 11px; border: 1px solid #E2DED5; border-radius: 10px; outline: none; background: #F5F3ED; font-size: 12px; }
-.form-field input:focus { border-color: #A9B69C; }
+.form-field input, .form-field select { height: 42px; padding: 0 11px; border: 1px solid #E2DED5; border-radius: 10px; outline: none; background: #F5F3ED; color: #5E685C; font-size: 12px; }
+.form-field input:focus, .form-field select:focus { border-color: #A9B69C; box-shadow: 0 0 0 3px #DCE5D4; }
+.form-error { min-height: 16px; margin: 14px 0 0; color: #B9786B; font-size: 11px; font-weight: 700; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .modal-actions button { padding: 11px 15px; border-radius: 10px; font-size: 12px; font-weight: 700; }
 .secondary-button { background: transparent; color: #7D8579; }

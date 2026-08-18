@@ -7,6 +7,11 @@ const navigation = document.querySelector('#department-nav');
 const pageTitle = document.querySelector('#page-title');
 const modalRoot = document.querySelector('#modal-root');
 const toastRoot = document.querySelector('#toast-root');
+const customClientsStorageKey = 'correa-controle-interno-custom-clients';
+const savedClients = loadSavedClients();
+savedClients.forEach((savedClient) => {
+  if (!clients.some((client) => client.cnpj === savedClient.cnpj)) clients.push(savedClient);
+});
 const menuToggle = document.querySelector('#menu-toggle');
 const menuClose = document.querySelector('#menu-close');
 const mobileOverlay = document.querySelector('#mobile-overlay');
@@ -142,13 +147,69 @@ function bindClientRows() {
   });
 }
 
+function loadSavedClients() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(customClientsStorageKey) || '[]');
+    return Array.isArray(saved) ? saved : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveClientToStorage(client) {
+  const saved = loadSavedClients();
+  saved.push(client);
+  localStorage.setItem(customClientsStorageKey, JSON.stringify(saved));
+}
+
+function createClientFromForm() {
+  const name = document.querySelector('#client-name').value.trim();
+  const cnpj = document.querySelector('#client-cnpj').value.trim();
+  const city = document.querySelector('#client-city').value.trim();
+  const tax = document.querySelector('#client-tax').value;
+  const activity = document.querySelector('#client-activity').value.trim();
+  const payroll = document.querySelector('#client-payroll').value;
+  const errorElement = document.querySelector('#form-error');
+
+  if (!name || !cnpj || !city || !tax || !activity || !payroll) {
+    errorElement.textContent = 'Preencha todos os campos para cadastrar o cliente.';
+    return null;
+  }
+
+  if (clients.some((client) => client.cnpj.replace(/\\D/g, '') === cnpj.replace(/\\D/g, ''))) {
+    errorElement.textContent = 'Já existe um cliente cadastrado com este CNPJ ou CPF.';
+    return null;
+  }
+
+  const initials = name.split(/\\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
+  const client = {
+    name,
+    cnpj,
+    city,
+    tax,
+    activity,
+    payroll,
+    active: true,
+    initials: initials || 'CL',
+    tone: 'mint'
+  };
+
+  clients.push(client);
+  saveClientToStorage(client);
+  return client;
+}
+
 function openModal() {
   modalRoot.innerHTML = renderModal();
   document.querySelector('#close-modal').addEventListener('click', closeModal);
   document.querySelector('#cancel-modal').addEventListener('click', closeModal);
   document.querySelector('#save-modal').addEventListener('click', () => {
+    const client = createClientFromForm();
+    if (!client) return;
     closeModal();
-    showToast('Ficha criada como rascunho. Conecte o banco de dados para persistir o cadastro.');
+    state.selectedClientCnpj = client.cnpj;
+    renderApp();
+    showToast(`${client.name} foi adicionado à lista de empresas.`);
   });
 }
 

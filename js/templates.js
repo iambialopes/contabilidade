@@ -198,36 +198,50 @@ function renderDepartment({ department, moduleData, selectedClient, clientsHtml,
 function renderModal() {
   return `
     <div class="modal-backdrop" id="modal-backdrop">
-      <div class="modal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-header">
           <div>
             <p class="eyebrow">Nova ficha</p>
-            <h2>Cadastrar cliente</h2>
-            <p class="modal-description">A primeira etapa para acompanhar as rotinas por setor.</p>
+            <h2 id="modal-title">Cadastrar cliente</h2>
+            <p class="modal-description">Preencha os dados principais para incluir a empresa na sua carteira.</p>
           </div>
           <button class="close" id="close-modal" aria-label="Fechar">×</button>
         </div>
         <div class="form-grid">
-          ${formField('Razão social', 'Nome da empresa', true)}
-          ${formField('CNPJ', '00.000.000/0000-00')}
-          ${formField('Cidade', 'Cidade / UF')}
-          ${formField('Tributação', 'Selecionar')}
-          ${formField('Atividade principal', 'Descreva a atividade', true)}
+          ${formField('Razão social', 'Nome da empresa', true, 'client-name')}
+          ${formField('CNPJ ou CPF', '00.000.000/0000-00', false, 'client-cnpj')}
+          ${formField('Cidade', 'Cidade / UF', false, 'client-city')}
+          ${formSelectField('Tributação', 'client-tax', ['MEI', 'SIMPLES', 'PRESUMIDO', 'REAL', 'PF'])}
+          ${formField('Atividade principal', 'Descreva a atividade', true, 'client-activity')}
+          ${formSelectField('Possui folha?', 'client-payroll', ['Sim', 'Não'])}
         </div>
+        <p class="form-error" id="form-error" role="alert"></p>
         <div class="modal-actions">
           <button class="secondary-button" id="cancel-modal">Cancelar</button>
-          <button class="primary-button" id="save-modal" style="margin:0">Salvar rascunho</button>
+          <button class="primary-button" id="save-modal" style="margin:0">Salvar cliente</button>
         </div>
       </div>
     </div>
   `;
 }
 
-function formField(label, placeholder, wide = false) {
+function formField(label, placeholder, wide = false, id = '') {
   return `
     <div class="form-field ${wide ? 'wide' : ''}">
-      <label>${label}</label>
-      <input placeholder="${placeholder}">
+      <label for="${id}">${label}</label>
+      <input id="${id}" placeholder="${placeholder}">
+    </div>
+  `;
+}
+
+function formSelectField(label, id, values) {
+  return `
+    <div class="form-field">
+      <label for="${id}">${label}</label>
+      <select id="${id}">
+        <option value="">Selecionar</option>
+        ${values.map((value) => `<option value="${value}">${value}</option>`).join('')}
+      </select>
     </div>
   `;
 }
