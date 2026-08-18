@@ -42,6 +42,7 @@
   .routine-grid { grid-template-columns: 1fr; }
   .section-heading, .routine-heading { align-items: start; flex-direction: column; }
   .table-tools { align-items: stretch; flex-direction: column; }
+  .table-scroll { max-height: 320px; }
   .form-grid { grid-template-columns: 1fr; }
   .form-field.wide { grid-column: auto; }
 }
