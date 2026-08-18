@@ -25,7 +25,7 @@ function renderOverview({ clientsHtml, lowerHtml }) {
     </section>
 
     <section class="summary-grid">
-      ${summaryCard('▥', 'Empresas ativas', '04', 'de 05 cadastradas')}
+      ${summaryCard('▥', 'Empresas ativas', '84', 'de 84 cadastradas')}
       ${summaryCard('☑', 'Rotinas em dia', '86%', '+8% este mês')}
       ${summaryCard('!', 'Pontos de atenção', '07', '2 vencem hoje')}
       ${summaryCard('▦', 'Próximo fechamento', '28 AGO', 'Folha mensal')}
