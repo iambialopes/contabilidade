@@ -20,8 +20,14 @@ for (let index = clients.length - 1; index >= 0; index -= 1) {
 const menuToggle = document.querySelector('#menu-toggle');
 const menuClose = document.querySelector('#menu-close');
 const mobileOverlay = document.querySelector('#mobile-overlay');
+const clientNameCollator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
+
+function sortClients() {
+  clients.sort((firstClient, secondClient) => clientNameCollator.compare(firstClient.name, secondClient.name));
+}
 
 function renderApp() {
+  sortClients();
   renderPageTitle();
   navigation.innerHTML = renderNavigation(departments, state.currentPage);
   pageContent.innerHTML = getPageTemplate();
