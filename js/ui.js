@@ -162,23 +162,43 @@ function bindClientRows() {
       const client = clients.find((item) => item.cnpj === button.dataset.clientDelete);
       if (!client) return;
 
-      const confirmed = window.confirm(
-        `Tem certeza que deseja excluir o cliente?\\n\\n${client.name}\\n${client.cnpj}\\n\\nEssa ação não poderá ser desfeita.`
-      );
-      if (!confirmed) return;
-
-      const clientIndex = clients.indexOf(client);
-      if (clientIndex >= 0) clients.splice(clientIndex, 1);
-      deleteClientFromStorage(client);
-
-      if (state.selectedClientCnpj === client.cnpj) {
-        state.selectedClientCnpj = clients[0]?.cnpj || '';
-      }
-
-      renderApp();
-      showToast(`${client.name} foi excluído da lista.`);
+      openDeleteConfirmation(client);
     });
   });
+}
+
+function openDeleteConfirmation(client) {
+  modalRoot.innerHTML = renderDeleteConfirmation(client);
+
+  const closeConfirmation = () => {
+    modalRoot.innerHTML = '';
+    window.removeEventListener('keydown', handleEscape);
+  };
+
+  const handleEscape = (event) => {
+    if (event.key === 'Escape') closeConfirmation();
+  };
+
+  document.querySelector('#cancel-delete').addEventListener('click', closeConfirmation);
+  document.querySelector('#delete-backdrop').addEventListener('click', (event) => {
+    if (event.target.id === 'delete-backdrop') closeConfirmation();
+  });
+  document.querySelector('#confirm-delete').addEventListener('click', () => {
+    const clientIndex = clients.indexOf(client);
+    if (clientIndex >= 0) clients.splice(clientIndex, 1);
+    deleteClientFromStorage(client);
+
+    if (state.selectedClientCnpj === client.cnpj) {
+      state.selectedClientCnpj = clients[0]?.cnpj || '';
+    }
+
+    closeConfirmation();
+    renderApp();
+    showToast(`${client.name} foi excluído da lista.`);
+  });
+
+  window.addEventListener('keydown', handleEscape);
+  document.querySelector('#cancel-delete').focus();
 }
 
 function loadSavedClients() {

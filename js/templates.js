@@ -225,6 +225,30 @@ function renderModal() {
   `;
 }
 
+function renderDeleteConfirmation(client) {
+  return `
+    <div class="modal-backdrop delete-backdrop" id="delete-backdrop">
+      <div class="modal delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
+        <div class="delete-icon" aria-hidden="true">!</div>
+        <div class="delete-copy">
+          <p class="eyebrow">Confirmação necessária</p>
+          <h2 id="delete-title">Excluir cliente?</h2>
+          <p>Você está prestes a excluir o cadastro abaixo:</p>
+          <div class="delete-client-card">
+            <strong>${client.name}</strong>
+            <span>${client.cnpj}</span>
+          </div>
+          <p class="delete-warning"><strong>Atenção:</strong> essa ação não poderá ser desfeita.</p>
+        </div>
+        <div class="modal-actions delete-actions">
+          <button class="secondary-button" id="cancel-delete" type="button">Cancelar</button>
+          <button class="delete-confirm-button" id="confirm-delete" type="button">Excluir cliente</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function formField(label, placeholder, wide = false, id = '') {
   return `
     <div class="form-field ${wide ? 'wide' : ''}">
