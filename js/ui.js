@@ -28,6 +28,7 @@ function sortClients() {
 
 function renderApp() {
   sortClients();
+  renderCurrentDate();
   renderPageTitle();
   navigation.innerHTML = renderNavigation(departments, state.currentPage);
   pageContent.innerHTML = getPageTemplate();
@@ -38,11 +39,25 @@ function renderApp() {
 
 function renderPageTitle() {
   if (state.currentPage === 'overview') {
-    pageTitle.textContent = 'Bom dia, Ihara';
+    pageTitle.textContent = 'Olá, Ihara';
     return;
   }
   const department = departments.find((item) => item.key === state.currentPage);
   pageTitle.textContent = `Departamento ${department.label}`;
+}
+
+function renderCurrentDate() {
+  const dateLabel = document.querySelector('#date-label');
+  if (!dateLabel) return;
+
+  const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date());
+
+  dateLabel.textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 }
 
 function getPageTemplate() {
