@@ -8,10 +8,15 @@ const pageTitle = document.querySelector('#page-title');
 const modalRoot = document.querySelector('#modal-root');
 const toastRoot = document.querySelector('#toast-root');
 const customClientsStorageKey = 'correa-controle-interno-custom-clients';
+const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
 const savedClients = loadSavedClients();
+const deletedClientCnpjs = loadDeletedClientCnpjs();
 savedClients.forEach((savedClient) => {
   if (!clients.some((client) => client.cnpj === savedClient.cnpj)) clients.push(savedClient);
 });
+for (let index = clients.length - 1; index >= 0; index -= 1) {
+  if (deletedClientCnpjs.includes(clients[index].cnpj)) clients.splice(index, 1);
+}
 const menuToggle = document.querySelector('#menu-toggle');
 const menuClose = document.querySelector('#menu-close');
 const mobileOverlay = document.querySelector('#mobile-overlay');
@@ -40,7 +45,12 @@ function getPageTemplate() {
   const lowerPanels = renderLowerPanels(selectedClient);
 
   if (state.currentPage === 'overview') {
-    return renderOverview({ clientsHtml: clientsSection, lowerHtml: lowerPanels });
+    return renderOverview({
+      clientsHtml: clientsSection,
+      lowerHtml: lowerPanels,
+      activeCount: clients.filter((client) => client.active).length,
+      totalCount: clients.length
+    });
   }
 
   return renderDepartment({
@@ -145,6 +155,30 @@ function bindClientRows() {
       renderApp();
     });
   });
+
+  document.querySelectorAll('[data-client-delete]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const client = clients.find((item) => item.cnpj === button.dataset.clientDelete);
+      if (!client) return;
+
+      const confirmed = window.confirm(
+        `Tem certeza que deseja excluir o cliente?\\n\\n${client.name}\\n${client.cnpj}\\n\\nEssa ação não poderá ser desfeita.`
+      );
+      if (!confirmed) return;
+
+      const clientIndex = clients.indexOf(client);
+      if (clientIndex >= 0) clients.splice(clientIndex, 1);
+      deleteClientFromStorage(client);
+
+      if (state.selectedClientCnpj === client.cnpj) {
+        state.selectedClientCnpj = clients[0]?.cnpj || '';
+      }
+
+      renderApp();
+      showToast(`${client.name} foi excluído da lista.`);
+    });
+  });
 }
 
 function loadSavedClients() {
@@ -160,6 +194,38 @@ function saveClientToStorage(client) {
   const saved = loadSavedClients();
   saved.push(client);
   localStorage.setItem(customClientsStorageKey, JSON.stringify(saved));
+  removeDeletedClientCnpj(client.cnpj);
+}
+
+function deleteClientFromStorage(client) {
+  const saved = loadSavedClients().filter((savedClient) => savedClient.cnpj !== client.cnpj);
+  if (saved.length) {
+    localStorage.setItem(customClientsStorageKey, JSON.stringify(saved));
+  } else {
+    localStorage.removeItem(customClientsStorageKey);
+  }
+
+  const deleted = loadDeletedClientCnpjs();
+  if (!deleted.includes(client.cnpj)) deleted.push(client.cnpj);
+  localStorage.setItem(deletedClientsStorageKey, JSON.stringify(deleted));
+}
+
+function loadDeletedClientCnpjs() {
+  try {
+    const deleted = JSON.parse(localStorage.getItem(deletedClientsStorageKey) || '[]');
+    return Array.isArray(deleted) ? deleted : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function removeDeletedClientCnpj(cnpj) {
+  const remaining = loadDeletedClientCnpjs().filter((deletedCnpj) => deletedCnpj !== cnpj);
+  if (remaining.length) {
+    localStorage.setItem(deletedClientsStorageKey, JSON.stringify(remaining));
+  } else {
+    localStorage.removeItem(deletedClientsStorageKey);
+  }
 }
 
 function createClientFromForm() {

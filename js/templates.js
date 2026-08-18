@@ -13,7 +13,7 @@ function renderNavigation(departments, currentPage) {
   `).join('');
 }
 
-function renderOverview({ clientsHtml, lowerHtml }) {
+function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount }) {
   return `
     <section class="paper-card">
       <div class="hero-copy">
@@ -25,7 +25,7 @@ function renderOverview({ clientsHtml, lowerHtml }) {
     </section>
 
     <section class="summary-grid">
-      ${summaryCard('▥', 'Empresas ativas', '84', 'de 84 cadastradas')}
+      ${summaryCard('▥', 'Empresas ativas', String(activeCount), `de ${totalCount} cadastradas`)}
       ${summaryCard('☑', 'Rotinas em dia', '86%', '+8% este mês')}
       ${summaryCard('!', 'Pontos de atenção', '07', '2 vencem hoje')}
       ${summaryCard('▦', 'Próximo fechamento', '28 AGO', 'Folha mensal')}
@@ -120,7 +120,7 @@ function renderClientRows(clients, selectedClientCnpj) {
       <td>${client.activity}</td>
       <td>${client.payroll}</td>
       <td><span class="status ${client.active ? '' : 'inactive'}"><i></i>${client.active ? 'Ativo' : 'Inativo'}</span></td>
-      <td>↗</td>
+      <td class="client-actions"><button class="delete-client" type="button" data-client-delete="${client.cnpj}" title="Excluir ${client.name}" aria-label="Excluir ${client.name}">×</button></td>
     </tr>
   `).join('');
 }
