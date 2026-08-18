@@ -46,7 +46,7 @@ function summaryCard(icon, label, value, detail) {
   `;
 }
 
-function renderClientsSection(rowsHtml, activeOnly) {
+function renderClientsSection(rowsHtml, filters, clients) {
   return `
     <section>
       <div class="section-heading">
@@ -63,9 +63,16 @@ function renderClientsSection(rowsHtml, activeOnly) {
             <span>⌕</span>
             <input id="client-search" placeholder="Buscar por empresa, CNPJ ou cidade">
           </div>
-          <button id="active-filter" class="filter-button ${activeOnly ? '' : 'all'}">
-            ${activeOnly ? 'Somente ativos' : 'Todos os clientes'}
+          <button id="clear-client-filters" class="filter-button all" type="button">
+            Limpar filtros
           </button>
+        </div>
+        <div class="filter-grid" aria-label="Filtros de clientes">
+          ${clientFilterSelect('city', 'Cidade', filters.city, clients.map((client) => client.city))}
+          ${clientFilterSelect('activity', 'Atividade', filters.activity, clients.map((client) => client.activity))}
+          ${clientFilterSelect('tax', 'Tributação', filters.tax, clients.map((client) => client.tax))}
+          ${clientFilterSelect('payroll', 'Folha', filters.payroll, clients.map((client) => client.payroll))}
+          ${clientFilterSelect('status', 'Status', filters.status, ['Ativo', 'Inativo'])}
         </div>
         <div class="table-scroll">
           <table>
@@ -80,6 +87,22 @@ function renderClientsSection(rowsHtml, activeOnly) {
         </div>
       </div>
     </section>
+  `;
+}
+
+function clientFilterSelect(field, label, selectedValue, values) {
+  const uniqueValues = [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const options = field === 'status'
+    ? [['', 'Todos'], ['active', 'Ativos'], ['inactive', 'Inativos']]
+    : [['', 'Todos'], ...uniqueValues.map((value) => [value, value])];
+
+  return `
+    <label class="filter-field">
+      <span>${label}</span>
+      <select class="client-filter" data-filter="${field}" aria-label="Filtrar por ${label.toLowerCase()}">
+        ${options.map(([value, text]) => `<option value="${value}" ${selectedValue === value ? 'selected' : ''}>${text}</option>`).join('')}
+      </select>
+    </label>
   `;
 }
 

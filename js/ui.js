@@ -48,15 +48,21 @@ function getPageTemplate() {
 }
 
 function getClientsSection() {
-  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.activeOnly);
+  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.filters, clients);
 }
 
 function getFilteredClients() {
   const search = state.searchTerm.toLowerCase().trim();
+  const filters = state.filters;
   return clients.filter((client) => {
-    const matchesStatus = !state.activeOnly || client.active;
+    const matchesStatus = !filters.status || (filters.status === 'active' ? client.active : !client.active);
     const searchableText = `${client.name} ${client.cnpj} ${client.city}`.toLowerCase();
-    return matchesStatus && searchableText.includes(search);
+    return matchesStatus
+      && searchableText.includes(search)
+      && (!filters.city || client.city === filters.city)
+      && (!filters.activity || client.activity === filters.activity)
+      && (!filters.tax || client.tax === filters.tax)
+      && (!filters.payroll || client.payroll === filters.payroll);
   });
 }
 
@@ -102,7 +108,8 @@ function bindActions() {
 
 function bindClientControls() {
   const searchInput = document.querySelector('#client-search');
-  const filterButton = document.querySelector('#active-filter');
+  const filterSelects = document.querySelectorAll('.client-filter');
+  const clearFiltersButton = document.querySelector('#clear-client-filters');
 
   searchInput?.addEventListener('input', (event) => {
     state.searchTerm = event.target.value;
@@ -110,8 +117,16 @@ function bindClientControls() {
     bindClientRows();
   });
 
-  filterButton?.addEventListener('click', () => {
-    state.activeOnly = !state.activeOnly;
+  filterSelects.forEach((select) => {
+    select.addEventListener('change', (event) => {
+      state.filters[event.target.dataset.filter] = event.target.value;
+      renderApp();
+    });
+  });
+
+  clearFiltersButton?.addEventListener('click', () => {
+    state.searchTerm = '';
+    state.filters = { city: '', activity: '', tax: '', payroll: '', status: '' };
     renderApp();
   });
 

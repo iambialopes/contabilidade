@@ -3,7 +3,14 @@ window.CorreaState = {
   currentPage: getPageFromHash(),
   selectedClientCnpj: '12.345.678/0001-90',
   activeOnly: true,
-  searchTerm: ''
+  searchTerm: '',
+  filters: {
+    city: '',
+    activity: '',
+    tax: '',
+    payroll: '',
+    status: 'active'
+  }
 };
 
 function getPageFromHash() {
