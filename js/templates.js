@@ -207,13 +207,25 @@ function renderModal() {
           </div>
           <button class="close" id="close-modal" aria-label="Fechar">×</button>
         </div>
+        <p class="form-section-label">Dados cadastrais</p>
         <div class="form-grid">
           ${formField('Razão social', 'Nome da empresa', true, 'client-name')}
           ${formField('CNPJ ou CPF', '00.000.000/0000-00', false, 'client-cnpj')}
-          ${formField('Cidade', 'Cidade / UF', false, 'client-city')}
-          ${formSelectField('Tributação', 'client-tax', ['MEI', 'SIMPLES', 'PRESUMIDO', 'REAL', 'PF'])}
-          ${formField('Atividade principal', 'Descreva a atividade', true, 'client-activity')}
-          ${formSelectField('Possui folha?', 'client-payroll', ['Sim', 'Não'])}
+          ${formSelectField('Município', 'client-city', ['BALNEARIO CAMBORIU', 'BLUMENAU', 'CRICIUMA', 'FLORIANOPOLIS', 'GAROPABA', 'IMBITUBA', 'LAGUNA', 'TUBARÃO'])}
+          ${formSelectField('Responsável contábil', 'client-accounting-responsible', ['ANA', 'GRACY', 'SEM CONTABILIDADE'])}
+          ${formSelectField('Tributação', 'client-tax', ['MEI', 'PF', 'PRESUMIDO', 'SIMPLES NACIONAL', 'SN COM FATOR R'])}
+          ${formSelectField('Atividade', 'client-activity', ['ASSOCIAÇÃO', 'COMERCIO', 'COMÉRCIO E SERVIÇO', 'CONDOMINIO', 'PESSOA FISICA', 'SERVIÇO'])}
+        </div>
+
+        <p class="form-section-label">Acompanhamento da planilha</p>
+        <div class="form-grid">
+          ${formSelectField('Informações folha', 'client-payroll-info', ['FUNCIONÁRIOS', 'PRÓ-LABORE', 'PRÓ-LABORE E FUNCIONÁRIOS', 'SEM FOLHA'])}
+          ${formSelectField('Fechamento fiscal', 'client-fiscal-closing', ['EM ANÁLISE', 'ENVIADO', 'NÃO FEITO', 'SEM MOVIMENTO'])}
+          ${formSelectField('Sintegra', 'client-sintegra', ['CLIENTE NOVO', 'DESOBRIGADO', 'ENVIAR', 'MEI - DESOBRIGADO', 'SIMPLES NACIONAL - SERVIÇO'])}
+          ${formSelectField('DSTDA', 'client-dstda', ['CLIENTE NOVO', 'DESOBRIGADO', 'MEI - DESOBRIGADO', 'SIMPLES NACIONAL - SERVIÇO', 'VERIFICAR OBRIGATORIEDADE'])}
+          ${formSelectField('Folha de pagamento', 'client-payroll-status', ['ENVIADO - DCTFWEB', 'ENVIADO- FUNCIONARIOS', 'ENVIADO- PRO LABORE', 'NÃO FEITO', 'SEM FOLHA'])}
+          ${formSelectField('Balancete contábil', 'client-balance', ['NÃO FEITO MEI', 'NÃO FEITO PRESUMIDO', 'NÃO FEITO SN', 'SEM ESCRITURAÇÃO', 'SEM MOVIMENTO'])}
+          ${formSelectField('EFD Reinf', 'client-efd-reinf', ['DISPENSA', 'VERIFICAR CONTÁBIL - DISTRIBUIÇÃO'])}
         </div>
         <p class="form-error" id="form-error" role="alert"></p>
         <div class="modal-actions">
@@ -258,9 +270,9 @@ function formField(label, placeholder, wide = false, id = '') {
   `;
 }
 
-function formSelectField(label, id, values) {
+function formSelectField(label, id, values, wide = false) {
   return `
-    <div class="form-field">
+    <div class="form-field ${wide ? 'wide' : ''}">
       <label for="${id}">${label}</label>
       <select id="${id}">
         <option value="">Selecionar</option>

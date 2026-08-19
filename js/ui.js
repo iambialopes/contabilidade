@@ -272,13 +272,20 @@ function removeDeletedClientCnpj(cnpj) {
 function createClientFromForm() {
   const name = document.querySelector('#client-name').value.trim();
   const cnpj = document.querySelector('#client-cnpj').value.trim();
-  const city = document.querySelector('#client-city').value.trim();
+  const city = document.querySelector('#client-city').value;
+  const accountingResponsible = document.querySelector('#client-accounting-responsible').value;
   const tax = document.querySelector('#client-tax').value;
-  const activity = document.querySelector('#client-activity').value.trim();
-  const payroll = document.querySelector('#client-payroll').value;
+  const activity = document.querySelector('#client-activity').value;
+  const payrollInfo = document.querySelector('#client-payroll-info').value;
+  const fiscalClosing = document.querySelector('#client-fiscal-closing').value;
+  const sintegra = document.querySelector('#client-sintegra').value;
+  const dstda = document.querySelector('#client-dstda').value;
+  const payrollStatus = document.querySelector('#client-payroll-status').value;
+  const balance = document.querySelector('#client-balance').value;
+  const efdReinf = document.querySelector('#client-efd-reinf').value;
   const errorElement = document.querySelector('#form-error');
 
-  if (!name || !cnpj || !city || !tax || !activity || !payroll) {
+  if (!name || !cnpj || !city || !accountingResponsible || !tax || !activity || !payrollInfo || !fiscalClosing || !sintegra || !dstda || !payrollStatus || !balance || !efdReinf) {
     errorElement.textContent = 'Preencha todos os campos para cadastrar o cliente.';
     return null;
   }
@@ -293,9 +300,17 @@ function createClientFromForm() {
     name,
     cnpj,
     city,
+    accountingResponsible,
     tax,
     activity,
-    payroll,
+    payrollInfo,
+    fiscalClosing,
+    sintegra,
+    dstda,
+    payrollStatus,
+    balance,
+    efdReinf,
+    payroll: payrollInfo === 'SEM FOLHA' ? 'Não' : 'Sim',
     active: true,
     initials: initials || 'CL',
     tone: 'mint'
