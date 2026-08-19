@@ -1,5 +1,5 @@
 /* Corrêa Controle Interno — Shell, navegação e layout estrutural. */
-.sidebar { position: fixed; z-index: 5; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 272px; min-height: 100vh; overflow: hidden; padding: 28px 20px 18px; background: var(--olive); box-shadow: 16px 0 40px rgba(56, 66, 47, .08); color: #F7F5EF; }
+.sidebar { position: fixed; z-index: 6; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 272px; min-height: 100vh; overflow: hidden; padding: 28px 20px 18px; background: var(--olive); box-shadow: 16px 0 40px rgba(56, 66, 47, .08); color: #F7F5EF; transform: translateX(-105%); transition: transform .24s var(--ease); }
 
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 7px 34px; }
 .brand-mark { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; overflow: hidden; border-radius: 12px; background: transparent; }
@@ -26,7 +26,7 @@
 .profile { flex: 0 0 auto; min-width: 0; margin-top: 16px; padding-top: 14px; border-top: 1px solid #ffffff1c; }
 .profile-copy { min-width: 0; overflow: hidden; }
 .profile-copy strong, .profile-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.app-main { margin-left: 272px; }
+.app-main { margin-left: 0; }
 .topbar { display: flex; align-items: center; justify-content: space-between; height: 84px; padding: 0 4%; border-bottom: 1px solid #E4E0D7; background: #F7F5EFee; backdrop-filter: blur(10px); }
 .topbar-title { display: flex; align-items: center; gap: 12px; }
 .topbar h1 { margin: 9px 0 0; color: #424C3C; font: 32px/1 Georgia, serif; }
