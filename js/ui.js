@@ -67,7 +67,7 @@ function renderCurrentDate() {
 function getPageTemplate() {
   const selectedClient = getSelectedClient();
   const clientsSection = getClientsSection();
-  const lowerPanels = renderLowerPanels(selectedClient, getDashboardData(selectedClient));
+  const lowerPanels = renderLowerPanels(selectedClient);
 
   if (state.currentPage === 'overview') {
     return renderOverview({

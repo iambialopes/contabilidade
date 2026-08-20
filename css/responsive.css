@@ -39,7 +39,7 @@ body.menu-open .sidebar { transform: translateX(0); }
   .client-dashboard { padding: 18px; }
   .client-dashboard-head { flex-direction: column; }
   .client-dashboard-actions { justify-content: flex-start; }
-  .client-dashboard-stats, .dashboard-sector-grid { grid-template-columns: 1fr; }
+  .client-dashboard-stats, .dashboard-sector-grid, .client-summary-meta { grid-template-columns: 1fr; }
   .routine-item { align-items: flex-start; flex-direction: column; }
   .routine-status { width: 100%; }
   .routine-item small { white-space: normal; }

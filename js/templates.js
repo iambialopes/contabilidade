@@ -188,48 +188,38 @@ function renderClientRows(clients, selectedClientCnpj) {
   `).join('');
 }
 
-function renderLowerPanels(selectedClient, dashboardData) {
-  const routineLabel = (status) => status === 'Concluído' ? 'Concluído' : status === 'Em andamento' ? 'Em andamento' : 'Pendente';
+function renderLowerPanels(selectedClient) {
+  const departmentSummary = [
+    { key: 'fiscal', label: 'Fiscal', eyebrow: 'Obrigações e guias', value: selectedClient.fiscalClosing || 'Acompanhar fechamento', detail: `Sintegra: ${selectedClient.sintegra || 'Não informado'}`, accent: 'peach' },
+    { key: 'pessoal', label: 'Pessoal', eyebrow: 'Folha e eventos', value: selectedClient.payrollInfo || 'Sem informação de folha', detail: `Folha: ${selectedClient.payrollStatus || 'Não informado'}`, accent: 'blue' },
+    { key: 'contabil', label: 'Contábil', eyebrow: 'Movimentação e balancete', value: selectedClient.balance || 'Acompanhar balancete', detail: 'Movimentação e fechamento contábil', accent: 'sand' },
+    { key: 'societario', label: 'Societário', eyebrow: 'Processos e procurações', value: 'Cadastro e processos', detail: 'Procurações, vínculos e alterações', accent: 'olive' }
+  ];
   return `
-    <section class="client-dashboard">
+    <section class="client-dashboard client-summary-dashboard">
       <div class="client-dashboard-head">
         <div>
-          <p class="eyebrow">Dashboard do cliente</p>
+          <p class="eyebrow">Resumo do cliente</p>
           <h3>${selectedClient.name}</h3>
           <p>${selectedClient.city} · ${selectedClient.tax} · ${selectedClient.activity} · ${selectedClient.active ? 'Cliente ativo' : 'Cliente inativo'}</p>
         </div>
-        <div class="client-dashboard-actions">
-          <button class="secondary-button" data-action="open-sheet">Abrir ficha ↗</button>
-          <button class="primary-button" data-action="routine-toast">Registrar andamento</button>
-        </div>
+        <button class="secondary-button" data-action="open-sheet">Abrir ficha ↗</button>
       </div>
 
-      <div class="client-dashboard-stats">
-        <div class="dashboard-stat"><span>Concluídas</span><strong>${dashboardData.done}</strong><small>de ${dashboardData.total} rotinas</small></div>
-        <div class="dashboard-stat alert"><span>Pendentes</span><strong>${dashboardData.pending}</strong><small>precisam de acompanhamento</small></div>
-        <div class="dashboard-stat warm"><span>Em andamento</span><strong>${dashboardData.inProgress}</strong><small>rotinas em execução</small></div>
-        <div class="dashboard-stat"><span>Progresso geral</span><strong>${dashboardData.percent}%</strong><small>atualização deste cliente</small></div>
+      <div class="client-summary-meta">
+        <div><span>CNPJ ou CPF</span><strong>${selectedClient.cnpj}</strong></div>
+        <div><span>Responsável contábil</span><strong>${selectedClient.accountingResponsible || 'Não informado'}</strong></div>
+        <div><span>Fechamento fiscal</span><strong>${selectedClient.fiscalClosing || 'Não informado'}</strong></div>
+        <div><span>Folha</span><strong>${selectedClient.payroll || 'Não informado'}</strong></div>
       </div>
 
-      <div class="dashboard-sector-grid">
-        ${dashboardData.departments.map((department) => `
-          <article class="dashboard-sector-card">
-            <div class="dashboard-sector-heading">
-              <div><p class="eyebrow">${department.eyebrow}</p><h4>${department.label}</h4></div>
-              <strong>${department.percent}%</strong>
-            </div>
-            <div class="progress-bar"><i style="width:${department.percent}%"></i></div>
-            <p class="dashboard-sector-meta">${department.done} concluídas · ${department.pending} pendentes</p>
-            <div class="routine-list">
-              ${department.tasks.map((task, index) => `
-                <div class="routine-item">
-                  <div><strong>${task[0]}</strong><small>${task[1]}</small><em>${task[3]}</em></div>
-                  <select class="routine-status ${routineLabel(task.status).toLowerCase().replace(' ', '-') }" data-routine-status data-client="${selectedClient.cnpj}" data-department="${department.key}" data-routine-index="${index}" aria-label="Status de ${task[0]}">
-                    ${['Pendente', 'Em andamento', 'Concluído'].map((status) => `<option value="${status}" ${task.status === status ? 'selected' : ''}>${status}</option>`).join('')}
-                  </select>
-                </div>
-              `).join('')}
-            </div>
+      <div class="dashboard-sector-grid summary-sector-grid">
+        ${departmentSummary.map((department) => `
+          <article class="dashboard-sector-card summary-sector-card ${department.accent}">
+            <div class="dashboard-sector-heading"><div><p class="eyebrow">${department.eyebrow}</p><h4>${department.label}</h4></div><span class="summary-sector-mark">↗</span></div>
+            <strong class="summary-sector-value">${department.value}</strong>
+            <p class="dashboard-sector-meta">${department.detail}</p>
+            <button class="department-summary-link" data-page="${department.key}">Abrir setor</button>
           </article>
         `).join('')}
       </div>
