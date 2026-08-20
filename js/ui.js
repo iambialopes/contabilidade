@@ -174,11 +174,20 @@ function bindActions() {
     });
   });
 
-  const departmentClientSelect = document.querySelector('#department-client-select');
-  departmentClientSelect?.addEventListener('change', (event) => {
-    state.selectedClientCnpj = event.target.value;
-    renderApp();
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  const departmentClientSearch = document.querySelector('#department-client-search');
+  const departmentClientResults = document.querySelector('#department-client-results');
+  departmentClientSearch?.addEventListener('input', (event) => {
+    const term = event.target.value.toLowerCase().trim();
+    departmentClientResults?.querySelectorAll('[data-department-client]').forEach((result) => {
+      result.hidden = term && !result.dataset.searchText.includes(term);
+    });
+  });
+  departmentClientResults?.querySelectorAll('[data-department-client]').forEach((result) => {
+    result.addEventListener('click', () => {
+      state.selectedClientCnpj = result.dataset.departmentClient;
+      renderApp();
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    });
   });
 
   document.querySelectorAll('[data-action="routine-toast"]').forEach((element) => {

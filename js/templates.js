@@ -237,11 +237,12 @@ function renderDepartment({ department, moduleData, selectedClient, clients }) {
       <div class="client-context">
         <p class="eyebrow">Cliente em foco</p>
         <label class="department-client-picker">
-          <span>Selecionar empresa</span>
-          <select id="department-client-select" aria-label="Selecionar cliente para ${department.label}">
-            ${sortedClients.map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}>${client.name} · ${client.city}</option>`).join('')}
-          </select>
+          <span>Pesquisar empresa</span>
+          <input id="department-client-search" type="search" value="${selectedClient.name}" placeholder="Nome, CNPJ ou cidade" autocomplete="off" aria-label="Pesquisar cliente para ${department.label}">
         </label>
+        <div class="department-client-results" id="department-client-results" role="listbox" aria-label="Resultados de clientes">
+          ${sortedClients.map((client) => `<button type="button" class="department-client-result ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}" data-department-client="${client.cnpj}" data-search-text="${`${client.name} ${client.cnpj} ${client.city}`.toLowerCase()}"><strong>${client.name}</strong><small>${client.cnpj} · ${client.city}</small></button>`).join('')}
+        </div>
         <small>${moduleData.metric} ${moduleData.metricLabel}</small>
       </div>
     </section>
