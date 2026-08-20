@@ -188,31 +188,50 @@ function renderClientRows(clients, selectedClientCnpj) {
   `).join('');
 }
 
-function renderLowerPanels(selectedClient) {
-  const progress = [['Fiscal', '82%'], ['Pessoal', '64%'], ['Contábil', '91%'], ['Societário', '48%']];
+function renderLowerPanels(selectedClient, dashboardData) {
+  const routineLabel = (status) => status === 'Concluído' ? 'Concluído' : status === 'Em andamento' ? 'Em andamento' : 'Pendente';
   return `
-    <section class="lower-grid">
-      <div class="panel">
-        <p class="eyebrow">Rotinas por setor</p>
-        <h3>Mapa de acompanhamento</h3>
-        ${progress.map(([label, value]) => `
-          <div class="progress-row">
-            <label>${label}</label>
-            <div class="progress-bar"><i style="width:${value}"></i></div>
-            <span>${value}</span>
-          </div>
-        `).join('')}
+    <section class="client-dashboard">
+      <div class="client-dashboard-head">
+        <div>
+          <p class="eyebrow">Dashboard do cliente</p>
+          <h3>${selectedClient.name}</h3>
+          <p>${selectedClient.city} · ${selectedClient.tax} · ${selectedClient.activity} · ${selectedClient.active ? 'Cliente ativo' : 'Cliente inativo'}</p>
+        </div>
+        <div class="client-dashboard-actions">
+          <button class="secondary-button" data-action="open-sheet">Abrir ficha ↗</button>
+          <button class="primary-button" data-action="routine-toast">Registrar andamento</button>
+        </div>
       </div>
 
-      <div class="panel client-focus">
-        <p class="eyebrow">Cliente selecionado</p>
-        <h4>${selectedClient.name}</h4>
-        <small>${selectedClient.city} · ${selectedClient.tax}</small>
-        <div class="focus-stats">
-          <div class="focus-stat"><small>Pendências</small><strong>03</strong></div>
-          <div class="focus-stat"><small>Em dia</small><strong>18</strong></div>
-        </div>
-        <button class="text-button" data-action="open-sheet">Ver ficha completa ↗</button>
+      <div class="client-dashboard-stats">
+        <div class="dashboard-stat"><span>Concluídas</span><strong>${dashboardData.done}</strong><small>de ${dashboardData.total} rotinas</small></div>
+        <div class="dashboard-stat alert"><span>Pendentes</span><strong>${dashboardData.pending}</strong><small>precisam de acompanhamento</small></div>
+        <div class="dashboard-stat warm"><span>Em andamento</span><strong>${dashboardData.inProgress}</strong><small>rotinas em execução</small></div>
+        <div class="dashboard-stat"><span>Progresso geral</span><strong>${dashboardData.percent}%</strong><small>atualização deste cliente</small></div>
+      </div>
+
+      <div class="dashboard-sector-grid">
+        ${dashboardData.departments.map((department) => `
+          <article class="dashboard-sector-card">
+            <div class="dashboard-sector-heading">
+              <div><p class="eyebrow">${department.eyebrow}</p><h4>${department.label}</h4></div>
+              <strong>${department.percent}%</strong>
+            </div>
+            <div class="progress-bar"><i style="width:${department.percent}%"></i></div>
+            <p class="dashboard-sector-meta">${department.done} concluídas · ${department.pending} pendentes</p>
+            <div class="routine-list">
+              ${department.tasks.map((task, index) => `
+                <div class="routine-item">
+                  <div><strong>${task[0]}</strong><small>${task[1]}</small><em>${task[3]}</em></div>
+                  <select class="routine-status ${routineLabel(task.status).toLowerCase().replace(' ', '-') }" data-routine-status data-client="${selectedClient.cnpj}" data-department="${department.key}" data-routine-index="${index}" aria-label="Status de ${task[0]}">
+                    ${['Pendente', 'Em andamento', 'Concluído'].map((status) => `<option value="${status}" ${task.status === status ? 'selected' : ''}>${status}</option>`).join('')}
+                  </select>
+                </div>
+              `).join('')}
+            </div>
+          </article>
+        `).join('')}
       </div>
     </section>
   `;

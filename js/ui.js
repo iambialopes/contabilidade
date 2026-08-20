@@ -10,6 +10,7 @@ const toastRoot = document.querySelector('#toast-root');
 const printRoot = document.querySelector('#print-root');
 const customClientsStorageKey = 'correa-controle-interno-custom-clients';
 const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
+const routineProgressStorageKey = 'correa-controle-interno-routine-progress';
 const savedClients = loadSavedClients();
 const deletedClientCnpjs = loadDeletedClientCnpjs();
 savedClients.forEach((savedClient) => {
@@ -66,7 +67,7 @@ function renderCurrentDate() {
 function getPageTemplate() {
   const selectedClient = getSelectedClient();
   const clientsSection = getClientsSection();
-  const lowerPanels = renderLowerPanels(selectedClient);
+  const lowerPanels = renderLowerPanels(selectedClient, getDashboardData(selectedClient));
 
   if (state.currentPage === 'overview') {
     return renderOverview({
@@ -110,6 +111,28 @@ function getSelectedClient() {
   return clients.find((client) => client.cnpj === state.selectedClientCnpj) || clients[0];
 }
 
+function loadRoutineProgress() {
+  try { return JSON.parse(localStorage.getItem(routineProgressStorageKey) || '{}'); } catch (error) { return {}; }
+}
+
+function getDashboardData(selectedClient) {
+  const progress = loadRoutineProgress()[selectedClient.cnpj] || {};
+  const departmentItems = Object.entries(departmentsData).map(([key, moduleData]) => {
+    const department = departments.find((item) => item.key === key);
+    const tasks = moduleData.tasks.map((task, index) => ({
+      ...task,
+      status: progress[`${key}.${index}`] || 'Pendente'
+    }));
+    const done = tasks.filter((task) => task.status === 'Concluído').length;
+    const inProgress = tasks.filter((task) => task.status === 'Em andamento').length;
+    return { key, label: department.label, eyebrow: moduleData.eyebrow, tasks, done, inProgress, pending: tasks.length - done, percent: tasks.length ? Math.round((done / tasks.length) * 100) : 0 };
+  });
+  const total = departmentItems.reduce((sum, department) => sum + department.tasks.length, 0);
+  const done = departmentItems.reduce((sum, department) => sum + department.done, 0);
+  const inProgress = departmentItems.reduce((sum, department) => sum + department.inProgress, 0);
+  return { total, done, inProgress, pending: total - done, percent: total ? Math.round((done / total) * 100) : 0, departments: departmentItems };
+}
+
 function bindNavigation() {
   document.querySelectorAll('[data-page]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -149,6 +172,21 @@ function bindActions() {
     element.addEventListener('click', () => {
       const client = getSelectedClient();
       if (client) openClientSheet(client);
+    });
+  });
+
+  document.querySelectorAll('[data-action="routine-toast"]').forEach((element) => {
+    element.addEventListener('click', () => showToast('Selecione o status de uma rotina para registrar o andamento deste cliente.'));
+  });
+
+  document.querySelectorAll('[data-routine-status]').forEach((select) => {
+    select.addEventListener('change', (event) => {
+      const progress = loadRoutineProgress();
+      progress[event.target.dataset.client] ||= {};
+      progress[event.target.dataset.client][`${event.target.dataset.department}.${event.target.dataset.routineIndex}`] = event.target.value;
+      localStorage.setItem(routineProgressStorageKey, JSON.stringify(progress));
+      renderApp();
+      showToast('Andamento da rotina atualizado.');
     });
   });
 }
