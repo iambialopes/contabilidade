@@ -22,9 +22,8 @@ body.menu-open .sidebar { transform: translateX(0); }
   .department-nav { display: flex; }
   .sidebar-focus { margin-top: auto; }
   .profile { display: flex; }
-  .app-main { margin-left: 0; }
-  .topbar { position: relative; z-index: 3; }
-  .topbar { height: 78px; padding: 0 16px; }
+  .app-main { margin-left: 0; padding-top: 78px; }
+  .topbar { z-index: 4; height: 78px; padding: 0 16px; }
   .mobile-mark { display: flex; }
   .topbar-title { min-width: 0; }
   .topbar-title > div:last-child { min-width: 0; }

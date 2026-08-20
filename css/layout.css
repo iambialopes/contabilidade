@@ -26,8 +26,8 @@
 .profile { flex: 0 0 auto; min-width: 0; margin-top: 16px; padding-top: 14px; border-top: 1px solid #ffffff1c; }
 .profile-copy { min-width: 0; overflow: hidden; }
 .profile-copy strong, .profile-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.app-main { margin-left: 0; }
-.topbar { display: flex; align-items: center; justify-content: space-between; height: 84px; padding: 0 4%; border-bottom: 1px solid #E4E0D7; background: #F7F5EFee; backdrop-filter: blur(10px); }
+.app-main { margin-left: 0; padding-top: 84px; }
+.topbar { position: fixed; z-index: 4; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; height: 84px; padding: 0 4%; border-bottom: 1px solid #E4E0D7; background: #F7F5EFee; backdrop-filter: blur(10px); }
 .topbar-title { display: flex; align-items: center; gap: 12px; }
 .topbar h1 { margin: 9px 0 0; color: #424C3C; font: 32px/1 Georgia, serif; }
 .mobile-mark { display: none; width: 40px; height: 40px; padding: 0; overflow: hidden; border-radius: 10px; background: transparent; }
