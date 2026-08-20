@@ -227,7 +227,8 @@ function renderLowerPanels(selectedClient) {
   `;
 }
 
-function renderDepartment({ department, moduleData, selectedClient, clientsHtml, lowerHtml }) {
+function renderDepartment({ department, moduleData, selectedClient, clients }) {
+  const sortedClients = [...clients].sort((first, second) => first.name.localeCompare(second.name, 'pt-BR'));
   return `
     <section class="dept-hero">
       <p class="eyebrow">${moduleData.eyebrow}</p>
@@ -235,7 +236,12 @@ function renderDepartment({ department, moduleData, selectedClient, clientsHtml,
       <p>${moduleData.intro}</p>
       <div class="client-context">
         <p class="eyebrow">Cliente em foco</p>
-        <strong>${selectedClient.name}</strong>
+        <label class="department-client-picker">
+          <span>Selecionar empresa</span>
+          <select id="department-client-select" aria-label="Selecionar cliente para ${department.label}">
+            ${sortedClients.map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}>${client.name} · ${client.city}</option>`).join('')}
+          </select>
+        </label>
         <small>${moduleData.metric} ${moduleData.metricLabel}</small>
       </div>
     </section>
@@ -261,9 +267,6 @@ function renderDepartment({ department, moduleData, selectedClient, clientsHtml,
         </button>
       `).join('')}
     </section>
-
-    ${clientsHtml}
-    ${lowerHtml}
   `;
 }
 

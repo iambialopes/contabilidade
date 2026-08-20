@@ -66,8 +66,8 @@ function renderCurrentDate() {
 
 function getPageTemplate() {
   const selectedClient = getSelectedClient();
-  const clientsSection = getClientsSection();
-  const lowerPanels = renderLowerPanels(selectedClient);
+  const clientsSection = state.currentPage === 'overview' ? getClientsSection() : '';
+  const lowerPanels = state.currentPage === 'overview' ? renderLowerPanels(selectedClient) : '';
 
   if (state.currentPage === 'overview') {
     return renderOverview({
@@ -82,8 +82,7 @@ function getPageTemplate() {
     department: departments.find((item) => item.key === state.currentPage),
     moduleData: departmentsData[state.currentPage],
     selectedClient,
-    clientsHtml: clientsSection,
-    lowerHtml: lowerPanels
+    clients
   });
 }
 
@@ -173,6 +172,13 @@ function bindActions() {
       const client = getSelectedClient();
       if (client) openClientSheet(client);
     });
+  });
+
+  const departmentClientSelect = document.querySelector('#department-client-select');
+  departmentClientSelect?.addEventListener('change', (event) => {
+    state.selectedClientCnpj = event.target.value;
+    renderApp();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   });
 
   document.querySelectorAll('[data-action="routine-toast"]').forEach((element) => {

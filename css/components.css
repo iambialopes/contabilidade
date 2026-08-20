@@ -79,7 +79,12 @@
 
 .dept-hero { padding: 30px 28px; }
 .dept-hero h2 { margin: 13px 0 8px; font-size: 38px; }
-.client-context { position: absolute; right: 26px; bottom: 25px; min-width: 210px; padding: 16px; border-radius: 15px; background: #F8F6F0; }
+.client-context { position: absolute; right: 26px; bottom: 25px; min-width: 270px; padding: 16px; border-radius: 15px; background: #F8F6F0; }
+.department-client-picker { display: block; margin-top: 8px; }
+.department-client-picker > span { display: block; color: #899184; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.department-client-picker select { width: 100%; height: 36px; margin-top: 6px; padding: 0 10px; border: 1px solid #D9DED2; border-radius: 9px; background: #FFF; color: #52604D; font-size: 12px; font-weight: 700; outline: none; }
+.department-client-picker select:focus { border-color: #A9B69C; box-shadow: 0 0 0 3px #DCE5D4; }
+.client-context small { margin-top: 8px; }
 .client-context strong, .client-context small { display: block; }
 .client-context strong { margin-top: 8px; color: #52604D; font-size: 13px; }
 .client-context small { margin-top: 4px; color: #899184; font-size: 10px; }
