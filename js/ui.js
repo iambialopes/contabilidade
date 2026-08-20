@@ -493,5 +493,7 @@ function showToast(message) {
 
 window.addEventListener('hashchange', () => {
   state.syncPageFromHash();
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   renderApp();
+  window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
 });
