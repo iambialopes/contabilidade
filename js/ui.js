@@ -100,7 +100,8 @@ function getFilteredClients() {
       && (!filters.city || client.city === filters.city)
       && (!filters.activity || client.activity === filters.activity)
       && (!filters.tax || client.tax === filters.tax)
-      && (!filters.payroll || client.payroll === filters.payroll);
+      && (!filters.payroll || client.payroll === filters.payroll)
+      && (!filters.fiscalClosing || client.fiscalClosing === filters.fiscalClosing);
   });
 }
 
@@ -171,7 +172,7 @@ function bindClientControls() {
 
   clearFiltersButton?.addEventListener('click', () => {
     state.searchTerm = '';
-    state.filters = { city: '', activity: '', tax: '', payroll: '', status: '' };
+    state.filters = { city: '', activity: '', tax: '', payroll: '', fiscalClosing: '', status: '' };
     renderApp();
   });
 

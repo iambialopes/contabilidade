@@ -72,6 +72,7 @@ function renderClientsSection(rowsHtml, filters, clients) {
           ${clientFilterSelect('activity', 'Atividade', filters.activity, clients.map((client) => client.activity))}
           ${clientFilterSelect('tax', 'Tributação', filters.tax, clients.map((client) => client.tax))}
           ${clientFilterSelect('payroll', 'Folha', filters.payroll, clients.map((client) => client.payroll))}
+          ${clientFilterSelect('fiscalClosing', 'Fechamento fiscal', filters.fiscalClosing, clients.map((client) => client.fiscalClosing))}
           ${clientFilterSelect('status', 'Status', filters.status, ['Ativo', 'Inativo'])}
         </div>
         <div class="table-scroll">
@@ -79,7 +80,7 @@ function renderClientsSection(rowsHtml, filters, clients) {
             <thead>
               <tr>
                 <th>Cliente</th><th>CNPJ</th><th>Cidade</th><th>Tributação</th>
-                <th>Atividade</th><th>Folha</th><th>Status</th><th></th>
+                <th>Atividade</th><th>Folha</th><th>Fechamento fiscal</th><th>Status</th><th></th>
               </tr>
             </thead>
             <tbody id="client-rows">${rowsHtml}</tbody>
@@ -108,7 +109,7 @@ function clientFilterSelect(field, label, selectedValue, values) {
 
 function renderClientRows(clients, selectedClientCnpj) {
   if (!clients.length) {
-    return '<tr><td colspan="9" style="text-align:center;padding:30px">Nenhum cliente encontrado.</td></tr>';
+    return '<tr><td colspan="10" style="text-align:center;padding:30px">Nenhum cliente encontrado.</td></tr>';
   }
 
   return clients.map((client) => `
@@ -119,6 +120,7 @@ function renderClientRows(clients, selectedClientCnpj) {
       <td><span class="tag">${client.tax}</span></td>
       <td>${client.activity}</td>
       <td>${client.payroll}</td>
+      <td><span class="fiscal-closing-value">${client.fiscalClosing || 'Não informado'}</span></td>
       <td><span class="status ${client.active ? '' : 'inactive'}"><i></i>${client.active ? 'Ativo' : 'Inativo'}</span></td>
       <td class="client-actions"><button class="client-sheet-button" type="button" data-client-open="${client.cnpj}" title="Abrir ficha de ${client.name}">Ficha ↗</button><button class="delete-client" type="button" data-client-delete="${client.cnpj}" title="Excluir ${client.name}" aria-label="Excluir ${client.name}">×</button></td>
     </tr>

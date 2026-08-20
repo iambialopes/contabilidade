@@ -9,6 +9,7 @@ window.CorreaState = {
     activity: '',
     tax: '',
     payroll: '',
+    fiscalClosing: '',
     status: 'active'
   }
 };
