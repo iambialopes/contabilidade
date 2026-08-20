@@ -140,6 +140,13 @@ function bindActions() {
   document.querySelectorAll('[data-action="new-client"]').forEach((element) => {
     element.addEventListener('click', openModal);
   });
+
+  document.querySelectorAll('[data-action="open-sheet"]').forEach((element) => {
+    element.addEventListener('click', () => {
+      const client = getSelectedClient();
+      if (client) openClientSheet(client);
+    });
+  });
 }
 
 function bindClientControls() {
@@ -170,6 +177,14 @@ function bindClientControls() {
 }
 
 function bindClientRows() {
+  document.querySelectorAll('[data-client-open]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const client = clients.find((item) => item.cnpj === button.dataset.clientOpen);
+      if (client) openClientSheet(client);
+    });
+  });
+
   document.querySelectorAll('[data-client]').forEach((row) => {
     row.addEventListener('click', () => {
       state.selectedClientCnpj = row.dataset.client;
@@ -186,6 +201,28 @@ function bindClientRows() {
       openDeleteConfirmation(client);
     });
   });
+}
+
+function openClientSheet(client) {
+  modalRoot.innerHTML = renderClientSheet(client);
+
+  const closeSheet = () => {
+    modalRoot.innerHTML = '';
+    window.removeEventListener('keydown', handleEscape);
+  };
+
+  const handleEscape = (event) => {
+    if (event.key === 'Escape') closeSheet();
+  };
+
+  document.querySelector('#close-sheet').addEventListener('click', closeSheet);
+  document.querySelector('#close-sheet-action').addEventListener('click', closeSheet);
+  document.querySelector('#sheet-backdrop').addEventListener('click', (event) => {
+    if (event.target.id === 'sheet-backdrop') closeSheet();
+  });
+
+  window.addEventListener('keydown', handleEscape);
+  document.querySelector('#close-sheet').focus();
 }
 
 function openDeleteConfirmation(client) {

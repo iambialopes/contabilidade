@@ -108,7 +108,7 @@ function clientFilterSelect(field, label, selectedValue, values) {
 
 function renderClientRows(clients, selectedClientCnpj) {
   if (!clients.length) {
-    return '<tr><td colspan="8" style="text-align:center;padding:30px">Nenhum cliente encontrado.</td></tr>';
+    return '<tr><td colspan="9" style="text-align:center;padding:30px">Nenhum cliente encontrado.</td></tr>';
   }
 
   return clients.map((client) => `
@@ -120,7 +120,7 @@ function renderClientRows(clients, selectedClientCnpj) {
       <td>${client.activity}</td>
       <td>${client.payroll}</td>
       <td><span class="status ${client.active ? '' : 'inactive'}"><i></i>${client.active ? 'Ativo' : 'Inativo'}</span></td>
-      <td class="client-actions"><button class="delete-client" type="button" data-client-delete="${client.cnpj}" title="Excluir ${client.name}" aria-label="Excluir ${client.name}">×</button></td>
+      <td class="client-actions"><button class="client-sheet-button" type="button" data-client-open="${client.cnpj}" title="Abrir ficha de ${client.name}">Ficha ↗</button><button class="delete-client" type="button" data-client-delete="${client.cnpj}" title="Excluir ${client.name}" aria-label="Excluir ${client.name}">×</button></td>
     </tr>
   `).join('');
 }
@@ -149,7 +149,7 @@ function renderLowerPanels(selectedClient) {
           <div class="focus-stat"><small>Pendências</small><strong>03</strong></div>
           <div class="focus-stat"><small>Em dia</small><strong>18</strong></div>
         </div>
-        <button class="text-button" data-action="toast" data-message="A ficha completa será habilitada na próxima etapa.">Ver ficha completa ↗</button>
+        <button class="text-button" data-action="open-sheet">Ver ficha completa ↗</button>
       </div>
     </section>
   `;
@@ -232,6 +232,50 @@ function renderModal() {
           <button class="secondary-button" id="cancel-modal">Cancelar</button>
           <button class="primary-button" id="save-modal" style="margin:0">Salvar cliente</button>
         </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderClientSheet(client) {
+  const fields = [
+    ['Razão social', client.name],
+    ['CNPJ ou CPF', client.cnpj],
+    ['Município', client.city],
+    ['Responsável contábil', client.accountingResponsible],
+    ['Tributação', client.tax],
+    ['Atividade', client.activity],
+    ['Informações folha', client.payrollInfo],
+    ['Fechamento fiscal', client.fiscalClosing],
+    ['Sintegra', client.sintegra],
+    ['DSTDA', client.dstda],
+    ['Folha de pagamento', client.payrollStatus],
+    ['Balancete contábil', client.balance],
+    ['EFD Reinf', client.efdReinf],
+    ['Status', client.active ? 'Ativo' : 'Inativo']
+  ];
+
+  return `
+    <div class="modal-backdrop sheet-backdrop" id="sheet-backdrop">
+      <div class="modal client-sheet-modal" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Ficha da empresa</p>
+            <h2 id="sheet-title">${client.name}</h2>
+            <p class="modal-description">Consulta dos dados cadastrais e do acompanhamento da planilha.</p>
+          </div>
+          <button class="close" id="close-sheet" aria-label="Fechar ficha">×</button>
+        </div>
+        <div class="client-sheet-identity">
+          <span class="initials ${client.tone}">${client.initials}</span>
+          <div><strong>${client.name}</strong><small>${client.cnpj} · ${client.city}</small></div>
+          <span class="status ${client.active ? '' : 'inactive'}"><i></i>${client.active ? 'Ativo' : 'Inativo'}</span>
+        </div>
+        <p class="form-section-label">Dados completos</p>
+        <div class="client-sheet-grid">
+          ${fields.map(([label, value]) => `<div class="client-sheet-field"><span>${label}</span><strong>${value || 'Não informado'}</strong></div>`).join('')}
+        </div>
+        <div class="modal-actions"><button class="secondary-button" id="close-sheet-action" type="button">Fechar ficha</button></div>
       </div>
     </div>
   `;
