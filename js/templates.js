@@ -92,7 +92,40 @@ function renderClientsSection(rowsHtml, filters, clients) {
   `;
 }
 
-function renderPrintReport(clients, filters, searchTerm = '') {
+function getPrintColumns() {
+  return [
+    ['Razão social', 'name'], ['CNPJ ou CPF', 'cnpj'], ['Município', 'city'], ['Resp. contábil', 'accountingResponsible'],
+    ['Tributação', 'tax'], ['Atividade', 'activity'], ['Informações folha', 'payrollInfo'], ['Fechamento fiscal', 'fiscalClosing'],
+    ['Sintegra', 'sintegra'], ['DSTDA', 'dstda'], ['Folha de pagamento', 'payrollStatus'], ['Balancete contábil', 'balance'],
+    ['EFD Reinf', 'efdReinf'], ['Status', 'active']
+  ];
+}
+
+function renderExportOptions() {
+  return `
+    <div class="modal-backdrop" id="export-options-backdrop">
+      <div class="modal export-options-modal" role="dialog" aria-modal="true" aria-labelledby="export-options-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Personalizar relatório</p>
+            <h2 id="export-options-title">Escolha as colunas</h2>
+            <p class="modal-description">Desmarque as informações que não deseja incluir no PDF. Os filtros atuais serão mantidos.</p>
+          </div>
+          <button class="close" id="close-export-options" aria-label="Fechar">×</button>
+        </div>
+        <div class="export-columns-grid">
+          ${getPrintColumns().map(([label, key]) => `<label class="export-column-option"><input type="checkbox" name="export-column" value="${key}" checked><span>${label}</span></label>`).join('')}
+        </div>
+        <div class="export-options-actions">
+          <button class="secondary-button" id="select-all-export-columns" type="button">Selecionar todas</button>
+          <div><button class="secondary-button" id="cancel-export-options" type="button">Cancelar</button><button class="primary-button" id="confirm-export-pdf" type="button">Gerar PDF</button></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPrintReport(clients, filters, searchTerm = '', selectedKeys = null) {
   const filterLabels = [
     ['Busca', searchTerm || 'Todas'],
     ['Cidade', filters.city || 'Todas'],
@@ -102,12 +135,7 @@ function renderPrintReport(clients, filters, searchTerm = '') {
     ['Fechamento fiscal', filters.fiscalClosing || 'Todos'],
     ['Status', filters.status === 'active' ? 'Ativos' : filters.status === 'inactive' ? 'Inativos' : 'Todos']
   ];
-  const columns = [
-    ['Razão social', 'name'], ['CNPJ ou CPF', 'cnpj'], ['Município', 'city'], ['Resp. contábil', 'accountingResponsible'],
-    ['Tributação', 'tax'], ['Atividade', 'activity'], ['Informações folha', 'payrollInfo'], ['Fechamento fiscal', 'fiscalClosing'],
-    ['Sintegra', 'sintegra'], ['DSTDA', 'dstda'], ['Folha de pagamento', 'payrollStatus'], ['Balancete contábil', 'balance'],
-    ['EFD Reinf', 'efdReinf'], ['Status', 'active']
-  ];
+  const columns = getPrintColumns().filter(([, key]) => !selectedKeys || selectedKeys.includes(key));
 
   return `
     <article class="print-report">

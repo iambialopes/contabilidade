@@ -115,6 +115,13 @@
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .modal-actions button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 11px 15px; border-radius: 10px; font-size: 12px; font-weight: 700; line-height: 1; }
 .client-sheet-modal { width: min(860px, calc(100vw - 48px)); }
+.export-options-modal { width: min(680px, calc(100vw - 48px)); }
+.export-columns-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
+.export-column-option { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 12px; border: 1px solid #E5E1D8; border-radius: 10px; background: #FBFAF6; color: #56634F; font-size: 12px; cursor: pointer; }
+.export-column-option:has(input:checked) { border-color: #C8D3BE; background: #EDF2E9; }
+.export-column-option input { width: 16px; height: 16px; accent-color: var(--olive); }
+.export-options-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.export-options-actions > div { display: flex; gap: 10px; }
 .client-sheet-modal .modal-actions { align-items: center; flex-wrap: wrap; }
 .client-sheet-modal .modal-actions button { min-width: 128px; margin: 0; }
 .client-sheet-identity { display: flex; align-items: center; gap: 12px; margin-top: 24px; padding: 14px 16px; border: 1px solid #E6E2D9; border-radius: 14px; background: #F7F5EF; }

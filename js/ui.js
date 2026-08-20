@@ -178,7 +178,7 @@ function bindClientControls() {
     renderApp();
   });
 
-  exportPdfButton?.addEventListener('click', exportClientsPdf);
+  exportPdfButton?.addEventListener('click', openExportOptions);
   bindClientRows();
 }
 
@@ -406,9 +406,34 @@ function closeModal() {
   modalRoot.innerHTML = '';
 }
 
-function exportClientsPdf() {
+function openExportOptions() {
+  modalRoot.innerHTML = renderExportOptions();
+  const closeOptions = () => { modalRoot.innerHTML = ''; };
+  document.querySelector('#close-export-options').addEventListener('click', closeOptions);
+  document.querySelector('#cancel-export-options').addEventListener('click', closeOptions);
+  document.querySelector('#export-options-backdrop').addEventListener('click', (event) => {
+    if (event.target.id === 'export-options-backdrop') closeOptions();
+  });
+  document.querySelector('#select-all-export-columns').addEventListener('click', () => {
+    const checkboxes = document.querySelectorAll('input[name="export-column"]');
+    const shouldSelect = [...checkboxes].some((checkbox) => !checkbox.checked);
+    checkboxes.forEach((checkbox) => { checkbox.checked = shouldSelect; });
+  });
+  document.querySelector('#confirm-export-pdf').addEventListener('click', () => {
+    const selectedKeys = [...document.querySelectorAll('input[name="export-column"]:checked')].map((checkbox) => checkbox.value);
+    if (!selectedKeys.length) {
+      showToast('Selecione pelo menos uma coluna para gerar o PDF.');
+      return;
+    }
+    closeOptions();
+    exportClientsPdf(selectedKeys);
+  });
+  document.querySelector('#close-export-options').focus();
+}
+
+function exportClientsPdf(selectedKeys) {
   const filteredClients = getFilteredClients();
-  printRoot.innerHTML = renderPrintReport(filteredClients, state.filters, state.searchTerm);
+  printRoot.innerHTML = renderPrintReport(filteredClients, state.filters, state.searchTerm, selectedKeys);
   document.body.classList.add('printing-report');
   showToast('Relatório pronto. Na janela de impressão, escolha “Salvar como PDF”.');
 
