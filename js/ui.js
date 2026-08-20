@@ -12,7 +12,9 @@ const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
 const savedClients = loadSavedClients();
 const deletedClientCnpjs = loadDeletedClientCnpjs();
 savedClients.forEach((savedClient) => {
-  if (!clients.some((client) => client.cnpj === savedClient.cnpj)) clients.push(savedClient);
+  const existingClient = clients.find((client) => client.cnpj === savedClient.cnpj);
+  if (existingClient) Object.assign(existingClient, savedClient);
+  else clients.push(savedClient);
 });
 for (let index = clients.length - 1; index >= 0; index -= 1) {
   if (deletedClientCnpjs.includes(clients[index].cnpj)) clients.splice(index, 1);
@@ -217,6 +219,10 @@ function openClientSheet(client) {
 
   document.querySelector('#close-sheet').addEventListener('click', closeSheet);
   document.querySelector('#close-sheet-action').addEventListener('click', closeSheet);
+  document.querySelector('#edit-sheet-action').addEventListener('click', () => {
+    closeSheet();
+    openModal(client);
+  });
   document.querySelector('#sheet-backdrop').addEventListener('click', (event) => {
     if (event.target.id === 'sheet-backdrop') closeSheet();
   });
@@ -270,7 +276,9 @@ function loadSavedClients() {
 
 function saveClientToStorage(client) {
   const saved = loadSavedClients();
-  saved.push(client);
+  const existingIndex = saved.findIndex((savedClient) => savedClient.cnpj === client.cnpj);
+  if (existingIndex >= 0) saved[existingIndex] = client;
+  else saved.push(client);
   localStorage.setItem(customClientsStorageKey, JSON.stringify(saved));
   removeDeletedClientCnpj(client.cnpj);
 }
@@ -306,7 +314,7 @@ function removeDeletedClientCnpj(cnpj) {
   }
 }
 
-function createClientFromForm() {
+function collectClientFromForm(existingClient = null) {
   const name = document.querySelector('#client-name').value.trim();
   const cnpj = document.querySelector('#client-cnpj').value.trim();
   const city = document.querySelector('#client-city').value;
@@ -320,20 +328,23 @@ function createClientFromForm() {
   const payrollStatus = document.querySelector('#client-payroll-status').value;
   const balance = document.querySelector('#client-balance').value;
   const efdReinf = document.querySelector('#client-efd-reinf').value;
+  const active = document.querySelector('#client-active').value === 'ATIVO';
   const errorElement = document.querySelector('#form-error');
 
   if (!name || !cnpj || !city || !accountingResponsible || !tax || !activity || !payrollInfo || !fiscalClosing || !sintegra || !dstda || !payrollStatus || !balance || !efdReinf) {
-    errorElement.textContent = 'Preencha todos os campos para cadastrar o cliente.';
+    errorElement.textContent = 'Preencha todos os campos para salvar a ficha.';
     return null;
   }
 
-  if (clients.some((client) => client.cnpj.replace(/\\D/g, '') === cnpj.replace(/\\D/g, ''))) {
-    errorElement.textContent = 'Já existe um cliente cadastrado com este CNPJ ou CPF.';
+  const normalizedCnpj = cnpj.replace(/\D/g, '');
+  if (clients.some((client) => client !== existingClient && client.cnpj.replace(/\D/g, '') === normalizedCnpj)) {
+    errorElement.textContent = 'Já existe outro cliente cadastrado com este CNPJ ou CPF.';
     return null;
   }
 
   const initials = name.split(/\\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
-  const client = {
+  const updatedClient = {
+    ...(existingClient || {}),
     name,
     cnpj,
     city,
@@ -348,27 +359,42 @@ function createClientFromForm() {
     balance,
     efdReinf,
     payroll: payrollInfo === 'SEM FOLHA' ? 'Não' : 'Sim',
-    active: true,
-    initials: initials || 'CL',
-    tone: 'mint'
+    active,
+    initials: initials || existingClient?.initials || 'CL',
+    tone: existingClient?.tone || 'mint'
   };
 
+  return updatedClient;
+}
+
+function createClientFromForm() {
+  const client = collectClientFromForm();
+  if (!client) return null;
   clients.push(client);
   saveClientToStorage(client);
   return client;
 }
 
-function openModal() {
-  modalRoot.innerHTML = renderModal();
+function updateClientFromForm(existingClient) {
+  const updatedClient = collectClientFromForm(existingClient);
+  if (!updatedClient) return null;
+  const clientIndex = clients.indexOf(existingClient);
+  if (clientIndex >= 0) clients[clientIndex] = updatedClient;
+  saveClientToStorage(updatedClient);
+  return updatedClient;
+}
+
+function openModal(existingClient = null) {
+  modalRoot.innerHTML = renderModal(existingClient);
   document.querySelector('#close-modal').addEventListener('click', closeModal);
   document.querySelector('#cancel-modal').addEventListener('click', closeModal);
   document.querySelector('#save-modal').addEventListener('click', () => {
-    const client = createClientFromForm();
+    const client = existingClient ? updateClientFromForm(existingClient) : createClientFromForm();
     if (!client) return;
     closeModal();
     state.selectedClientCnpj = client.cnpj;
     renderApp();
-    showToast(`${client.name} foi adicionado à lista de empresas.`);
+    showToast(existingClient ? `${client.name} foi atualizado.` : `${client.name} foi adicionado à lista de empresas.`);
   });
 }
 
