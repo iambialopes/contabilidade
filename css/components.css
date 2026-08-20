@@ -121,7 +121,8 @@
 .export-column-option:has(input:checked) { border-color: #C8D3BE; background: #EDF2E9; }
 .export-column-option input { width: 16px; height: 16px; accent-color: var(--olive); }
 .export-options-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
-.export-options-actions > div { display: flex; gap: 10px; }
+.export-options-actions > div { display: flex; align-items: center; gap: 10px; }
+.export-options-actions button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; margin: 0; line-height: 1; }
 .client-sheet-modal .modal-actions { align-items: center; flex-wrap: wrap; }
 .client-sheet-modal .modal-actions button { min-width: 128px; margin: 0; }
 .client-sheet-identity { display: flex; align-items: center; gap: 12px; margin-top: 24px; padding: 14px 16px; border: 1px solid #E6E2D9; border-radius: 14px; background: #F7F5EF; }
