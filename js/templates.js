@@ -63,9 +63,10 @@ function renderClientsSection(rowsHtml, filters, clients) {
             <span>⌕</span>
             <input id="client-search" placeholder="Buscar por empresa, CNPJ ou cidade">
           </div>
-          <button id="clear-client-filters" class="filter-button all" type="button">
-            Limpar filtros
-          </button>
+          <div class="table-tool-actions">
+            <button id="export-clients-pdf" class="filter-button export-button" type="button">⇩ Exportar PDF</button>
+            <button id="clear-client-filters" class="filter-button all" type="button">Limpar filtros</button>
+          </div>
         </div>
         <div class="filter-grid" aria-label="Filtros de clientes">
           ${clientFilterSelect('city', 'Cidade', filters.city, clients.map((client) => client.city))}
@@ -88,6 +89,38 @@ function renderClientsSection(rowsHtml, filters, clients) {
         </div>
       </div>
     </section>
+  `;
+}
+
+function renderPrintReport(clients, filters, searchTerm = '') {
+  const filterLabels = [
+    ['Busca', searchTerm || 'Todas'],
+    ['Cidade', filters.city || 'Todas'],
+    ['Atividade', filters.activity || 'Todas'],
+    ['Tributação', filters.tax || 'Todas'],
+    ['Folha', filters.payroll || 'Todas'],
+    ['Fechamento fiscal', filters.fiscalClosing || 'Todos'],
+    ['Status', filters.status === 'active' ? 'Ativos' : filters.status === 'inactive' ? 'Inativos' : 'Todos']
+  ];
+  const columns = [
+    ['Razão social', 'name'], ['CNPJ ou CPF', 'cnpj'], ['Município', 'city'], ['Resp. contábil', 'accountingResponsible'],
+    ['Tributação', 'tax'], ['Atividade', 'activity'], ['Informações folha', 'payrollInfo'], ['Fechamento fiscal', 'fiscalClosing'],
+    ['Sintegra', 'sintegra'], ['DSTDA', 'dstda'], ['Folha de pagamento', 'payrollStatus'], ['Balancete contábil', 'balance'],
+    ['EFD Reinf', 'efdReinf'], ['Status', 'active']
+  ];
+
+  return `
+    <article class="print-report">
+      <header class="print-report-header">
+        <div><p class="eyebrow">Corrêa Controle Interno</p><h1>Relatório de empresas</h1><p>Informações cadastrais e acompanhamento da planilha AGOSTO 26.</p></div>
+        <div class="print-report-date">Emitido em ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date())}</div>
+      </header>
+      <section class="print-filters"><strong>Filtros aplicados</strong>${filterLabels.map(([label, value]) => `<span><b>${label}:</b> ${escapeHtml(value)}</span>`).join('')}</section>
+      <p class="print-report-count">${clients.length} empresa${clients.length === 1 ? '' : 's'} encontrada${clients.length === 1 ? '' : 's'}</p>
+      <table><thead><tr>${columns.map(([label]) => `<th>${label}</th>`).join('')}</tr></thead><tbody>
+        ${clients.map((client) => `<tr>${columns.map(([, key]) => `<td>${escapeHtml(key === 'active' ? (client.active ? 'Ativo' : 'Inativo') : client[key] || 'Não informado')}</td>`).join('')}</tr>`).join('')}
+      </tbody></table>
+    </article>
   `;
 }
 

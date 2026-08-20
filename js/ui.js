@@ -7,6 +7,7 @@ const navigation = document.querySelector('#department-nav');
 const pageTitle = document.querySelector('#page-title');
 const modalRoot = document.querySelector('#modal-root');
 const toastRoot = document.querySelector('#toast-root');
+const printRoot = document.querySelector('#print-root');
 const customClientsStorageKey = 'correa-controle-interno-custom-clients';
 const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
 const savedClients = loadSavedClients();
@@ -156,6 +157,7 @@ function bindClientControls() {
   const searchInput = document.querySelector('#client-search');
   const filterSelects = document.querySelectorAll('.client-filter');
   const clearFiltersButton = document.querySelector('#clear-client-filters');
+  const exportPdfButton = document.querySelector('#export-clients-pdf');
 
   searchInput?.addEventListener('input', (event) => {
     state.searchTerm = event.target.value;
@@ -176,6 +178,7 @@ function bindClientControls() {
     renderApp();
   });
 
+  exportPdfButton?.addEventListener('click', exportClientsPdf);
   bindClientRows();
 }
 
@@ -401,6 +404,23 @@ function openModal(existingClient = null) {
 
 function closeModal() {
   modalRoot.innerHTML = '';
+}
+
+function exportClientsPdf() {
+  const filteredClients = getFilteredClients();
+  printRoot.innerHTML = renderPrintReport(filteredClients, state.filters, state.searchTerm);
+  document.body.classList.add('printing-report');
+  showToast('Relatório pronto. Na janela de impressão, escolha “Salvar como PDF”.');
+
+  const cleanup = () => {
+    printRoot.innerHTML = '';
+    document.body.classList.remove('printing-report');
+    window.removeEventListener('afterprint', cleanup);
+  };
+
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+  window.setTimeout(cleanup, 3000);
 }
 
 function showToast(message) {
