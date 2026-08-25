@@ -226,3 +226,12 @@
   .print-report td { padding: 4px; border: 1px solid #E0E3DC; color: #4C5549; vertical-align: top; overflow-wrap: anywhere; }
   .print-report tr:nth-child(even) { background: #FAFBF8; }
 }
+
+.month-context-bar { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:24px 0 18px; padding:18px 22px; border:1px solid var(--line); border-radius:var(--radius-card); background:var(--paper); box-shadow:var(--shadow); }
+.month-context-bar > div:first-child { display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 14px; }
+.month-context-bar .eyebrow { flex-basis:100%; margin:0; }
+.month-context-bar strong { color:var(--ink); font-family:Georgia, serif; font-size:1.35rem; font-weight:500; }
+.month-context-bar span { color:var(--muted); font-size:.88rem; }
+.month-select-field { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.month-select-field select { min-width:142px; border:1px solid var(--line); border-radius:10px; padding:10px 34px 10px 12px; color:var(--ink); background:var(--cream); font:inherit; letter-spacing:normal; text-transform:none; }
+@media (max-width:700px) { .month-context-bar { align-items:stretch; flex-direction:column; gap:14px; } .month-select-field { justify-content:space-between; } .month-select-field select { flex:1; } }

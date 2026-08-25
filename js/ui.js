@@ -1,6 +1,6 @@
 /* Corrêa Controle Interno — Renderização e eventos de interface. */
 
-const { clients, departments, departmentsData } = window.CorreaData;
+const { clients, departments, departmentsData, monthHistory = {}, months = [] } = window.CorreaData;
 const state = window.CorreaState;
 const pageContent = document.querySelector('#page-content');
 const navigation = document.querySelector('#department-nav');
@@ -28,6 +28,23 @@ const clientNameCollator = new Intl.Collator('pt-BR', { sensitivity: 'base', num
 
 function sortClients() {
   clients.sort((firstClient, secondClient) => clientNameCollator.compare(firstClient.name, secondClient.name));
+}
+
+function normalizeDocument(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function getVisibleClients() {
+  const snapshots = monthHistory[state.selectedMonth];
+  if (!snapshots) return clients;
+  return snapshots.map((snapshot) => {
+    const current = clients.find((client) => normalizeDocument(client.cnpj) === normalizeDocument(snapshot.cnpj) || client.name.toLowerCase() === snapshot.name.toLowerCase());
+    return { ...current, ...snapshot, tone: current?.tone || snapshot.tone, initials: current?.initials || snapshot.initials };
+  });
+}
+
+function getClientByCnpj(cnpj) {
+  return getVisibleClients().find((client) => client.cnpj === cnpj) || clients.find((client) => client.cnpj === cnpj);
 }
 
 function renderApp() {
@@ -73,8 +90,10 @@ function getPageTemplate() {
     return renderOverview({
       clientsHtml: clientsSection,
       lowerHtml: lowerPanels,
-      activeCount: clients.filter((client) => client.active).length,
-      totalCount: clients.length
+      activeCount: getVisibleClients().filter((client) => client.active).length,
+      totalCount: getVisibleClients().length,
+      selectedMonth: state.selectedMonth,
+      months: [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b))
     });
   }
 
@@ -87,13 +106,24 @@ function getPageTemplate() {
 }
 
 function getClientsSection() {
-  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.filters, clients);
+  const visibleClients = getVisibleClients();
+  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.filters, visibleClients);
+}
+
+function monthSortValue(label) {
+  const monthsOrder = { JAN: 1, FEV: 2, MAR: 3, ABR: 4, ABRIL: 4, MAI: 5, MAIO: 5, JUN: 6, JUNHO: 6, JUL: 7, JULHO: 7, AGO: 8, AGOSTO: 8, SET: 9, SETEMBRO: 9, OUT: 10, OUTUBRO: 10, NOV: 11, NOVEMBRO: 11, DEZ: 12, DEZEMBRO: 12 };
+  const match = String(label).toUpperCase().match(/^[A-ZÇ]+\s*(\d{2})?$/);
+  if (!match) return 0;
+  const parts = String(label).toUpperCase().split(/\s+/);
+  const month = monthsOrder[parts[0]] || 0;
+  const year = Number(parts[1] || '26');
+  return (2000 + year) * 100 + month;
 }
 
 function getFilteredClients() {
   const search = state.searchTerm.toLowerCase().trim();
   const filters = state.filters;
-  return clients.filter((client) => {
+  return getVisibleClients().filter((client) => {
     const matchesStatus = !filters.status || (filters.status === 'active' ? client.active : !client.active);
     const searchableText = `${client.name} ${client.cnpj} ${client.city}`.toLowerCase();
     return matchesStatus
@@ -107,7 +137,8 @@ function getFilteredClients() {
 }
 
 function getSelectedClient() {
-  return clients.find((client) => client.cnpj === state.selectedClientCnpj) || clients[0];
+  const visibleClients = getVisibleClients();
+  return visibleClients.find((client) => client.cnpj === state.selectedClientCnpj) || visibleClients[0] || clients[0];
 }
 
 function loadRoutineProgress() {
@@ -211,6 +242,16 @@ function bindClientControls() {
   const filterSelects = document.querySelectorAll('.client-filter');
   const clearFiltersButton = document.querySelector('#clear-client-filters');
   const exportPdfButton = document.querySelector('#export-clients-pdf');
+  const monthSelectElement = document.querySelector('#overview-month-select');
+
+  monthSelectElement?.addEventListener('change', (event) => {
+    state.selectedMonth = event.target.value;
+    state.searchTerm = '';
+    state.filters = { city: '', activity: '', tax: '', payroll: '', fiscalClosing: '', status: 'active' };
+    const visibleClients = getVisibleClients();
+    if (!visibleClients.some((client) => client.cnpj === state.selectedClientCnpj)) state.selectedClientCnpj = visibleClients[0]?.cnpj || '';
+    renderApp();
+  });
 
   searchInput?.addEventListener('input', (event) => {
     state.searchTerm = event.target.value;
@@ -239,7 +280,7 @@ function bindClientRows() {
   document.querySelectorAll('[data-client-open]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
-      const client = clients.find((item) => item.cnpj === button.dataset.clientOpen);
+      const client = getClientByCnpj(button.dataset.clientOpen);
       if (client) openClientSheet(client);
     });
   });
@@ -254,7 +295,7 @@ function bindClientRows() {
   document.querySelectorAll('[data-client-delete]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
-      const client = clients.find((item) => item.cnpj === button.dataset.clientDelete);
+      const client = getClientByCnpj(button.dataset.clientDelete);
       if (!client) return;
 
       openDeleteConfirmation(client);

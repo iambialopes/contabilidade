@@ -1,7 +1,8 @@
 /* Corrêa Controle Interno — Estado simples da aplicação. */
 window.CorreaState = {
   currentPage: getPageFromHash(),
-  selectedClientCnpj: '12.345.678/0001-90',
+  selectedClientCnpj: '42.910.621/0001-52',
+  selectedMonth: 'AGOSTO 26',
   activeOnly: true,
   searchTerm: '',
   filters: {

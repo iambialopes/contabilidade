@@ -13,7 +13,7 @@ function renderNavigation(departments, currentPage) {
   `).join('');
 }
 
-function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount }) {
+function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selectedMonth, months }) {
   return `
     <section class="paper-card">
       <div class="hero-copy">
@@ -22,6 +22,11 @@ function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount }) {
         <p>Centralize as rotinas dos quatro departamentos e encontre rapidamente o próximo passo de cada empresa.</p>
         <button class="primary-button" data-action="new-client">＋ Cadastrar cliente</button>
       </div>
+    </section>
+
+    <section class="month-context-bar">
+      <div><p class="eyebrow">Competência em análise</p><strong>${selectedMonth}</strong><span>Consulte a situação dos clientes conforme o mês selecionado.</span></div>
+      ${monthSelect('overview-month-select', selectedMonth, months)}
     </section>
 
     <section class="summary-grid">
@@ -150,6 +155,10 @@ function renderPrintReport(clients, filters, searchTerm = '', selectedKeys = nul
       </tbody></table>
     </article>
   `;
+}
+
+function monthSelect(id, selectedMonth, months) {
+  return `<label class="month-select-field"><span>Mês</span><select id="${id}" aria-label="Selecionar mês">${months.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('')}</select></label>`;
 }
 
 function clientFilterSelect(field, label, selectedValue, values) {
