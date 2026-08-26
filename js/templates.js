@@ -25,7 +25,7 @@ function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selec
     </section>
 
     <section class="month-context-bar">
-      <div><p class="eyebrow">Competência em análise</p><strong>${selectedMonth}</strong><span>Consulte a situação dos clientes conforme o mês selecionado.</span></div>
+      <div><p class="eyebrow">Competência em análise</p><strong>${selectedMonth}</strong></div>
       <div class="month-context-actions">
         ${competenceSelectors(selectedMonth, selectedYear, months)}
         <button class="secondary-button month-new-button" type="button" data-action="new-competence">＋ Nova competência</button>
