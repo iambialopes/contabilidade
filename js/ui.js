@@ -102,7 +102,8 @@ function getPageTemplate() {
       activeCount: getVisibleClients().filter((client) => client.active).length,
       totalCount: getVisibleClients().length,
       selectedMonth: state.selectedMonth,
-      months: [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b))
+      months: [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b)),
+      canDeleteSelectedMonth: !originalMonthKeys.has(state.selectedMonth)
     });
   }
 
@@ -239,6 +240,33 @@ function openCompetenceClientModal() {
   document.querySelector('#client-name')?.focus();
 }
 
+function openDeleteCompetenceConfirmation() {
+  const month = state.selectedMonth;
+  if (originalMonthKeys.has(month)) {
+    showToast('As competências importadas da planilha não podem ser excluídas.');
+    return;
+  }
+  modalRoot.innerHTML = renderDeleteCompetenceConfirmation(month);
+  const close = () => closeModal();
+  document.querySelector('#cancel-delete-competence')?.addEventListener('click', close);
+  document.querySelector('#delete-competence-backdrop')?.addEventListener('click', (event) => {
+    if (event.target.id === 'delete-competence-backdrop') close();
+  });
+  document.querySelector('#confirm-delete-competence')?.addEventListener('click', () => {
+    delete monthHistory[month];
+    const monthIndex = months.indexOf(month);
+    if (monthIndex >= 0) months.splice(monthIndex, 1);
+    saveCompetenciesToStorage();
+    const sortedMonths = [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b));
+    state.selectedMonth = sortedMonths[sortedMonths.length - 1] || '';
+    state.selectedClientCnpj = getVisibleClients()[0]?.cnpj || '';
+    close();
+    renderApp();
+    showToast(`${month} foi excluída.`);
+  });
+  document.querySelector('#cancel-delete-competence')?.focus();
+}
+
 function confirmNewCompetence(sourceMonth) {
   const errorElement = document.querySelector('#competence-error');
   const targetMonth = normalizeCompetenceLabel(competenceTargetMonth);
@@ -317,6 +345,10 @@ function bindActions() {
 
   document.querySelectorAll('[data-action="new-competence"]').forEach((element) => {
     element.addEventListener('click', openNewCompetenceModal);
+  });
+
+  document.querySelectorAll('[data-action="delete-competence"]').forEach((element) => {
+    element.addEventListener('click', openDeleteCompetenceConfirmation);
   });
 
   document.querySelectorAll('[data-action="open-sheet"]').forEach((element) => {

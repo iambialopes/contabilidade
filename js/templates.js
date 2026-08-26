@@ -13,7 +13,7 @@ function renderNavigation(departments, currentPage) {
   `).join('');
 }
 
-function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selectedMonth, months }) {
+function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selectedMonth, months, canDeleteSelectedMonth }) {
   return `
     <section class="paper-card">
       <div class="hero-copy">
@@ -29,6 +29,7 @@ function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selec
       <div class="month-context-actions">
         ${monthSelect('overview-month-select', selectedMonth, months)}
         <button class="secondary-button month-new-button" type="button" data-action="new-competence">＋ Nova competência</button>
+        ${canDeleteSelectedMonth ? '<button class="secondary-button month-delete-button" type="button" data-action="delete-competence">Excluir competência</button>' : ''}
       </div>
     </section>
 
@@ -161,7 +162,35 @@ function renderPrintReport(clients, filters, searchTerm = '', selectedKeys = nul
 }
 
 function monthSelect(id, selectedMonth, months) {
-  return `<label class="month-select-field"><span>Mês</span><select id="${id}" aria-label="Selecionar mês">${months.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('')}</select></label>`;
+  const groups = months.reduce((accumulator, month) => {
+    const year = String(month).split(/\s+/).pop();
+    accumulator[year] ||= [];
+    accumulator[year].push(month);
+    return accumulator;
+  }, {});
+  const options = Object.entries(groups).map(([year, yearMonths]) => `<optgroup label="20${year}">${yearMonths.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('')}</optgroup>`).join('');
+  return `<label class="month-select-field"><span>Mês</span><select id="${id}" aria-label="Selecionar mês">${options}</select></label>`;
+}
+
+function renderDeleteCompetenceConfirmation(month) {
+  return `
+    <div class="modal-backdrop" id="delete-competence-backdrop">
+      <div class="modal delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-competence-title">
+        <div class="delete-icon" aria-hidden="true">!</div>
+        <div class="delete-copy">
+          <p class="eyebrow">Confirmação necessária</p>
+          <h2 id="delete-competence-title">Excluir competência?</h2>
+          <p>Você está prestes a excluir a competência criada abaixo:</p>
+          <div class="delete-client-card"><strong>${escapeHtml(month)}</strong><span>Os dados revisados deste mês serão removidos deste navegador.</span></div>
+          <p class="delete-warning"><strong>Atenção:</strong> as competências importadas da planilha não podem ser excluídas.</p>
+        </div>
+        <div class="modal-actions delete-actions">
+          <button class="secondary-button" id="cancel-delete-competence" type="button">Cancelar</button>
+          <button class="delete-confirm-button" id="confirm-delete-competence" type="button">Excluir competência</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function reviewSelect(index, field, value, options) {
@@ -184,7 +213,7 @@ function renderNewCompetenceModal({ sourceMonth, targetMonth, clients }) {
         </div>
         <div class="competence-target-field"><label for="competence-target-month">Nome da nova competência</label><input id="competence-target-month" value="${safeTargetMonth}" placeholder="Ex.: OUTUBRO 26" autocomplete="off"><span>O mês será criado somente depois da confirmação.</span></div>
         <div class="competence-review-note"><strong>${clients.length} clientes serão levados para a nova competência.</strong><span>Revise as situações abaixo; as alterações só serão salvas ao confirmar a nova competência.</span></div>
-        <div class="competence-review-toolbar"><p class="form-section-label">Conferência da carteira</p><button class="text-button" id="competence-add-client" type="button">＋ Adicionar cliente</button></div>
+        <div class="competence-review-toolbar"><p class="form-section-label">Conferência</p><button class="text-button" id="competence-add-client" type="button">＋ Adicionar cliente</button></div>
         <div class="competence-table-scroll">
           <table class="competence-table">
             <thead><tr><th>Cliente</th><th>CNPJ ou CPF</th><th>Tributação</th><th>Atividade</th><th>Informações folha</th><th>Fechamento fiscal</th><th>Sintegra</th><th>DSTDA</th><th>Folha pagamento</th><th>Balancete</th><th>EFD Reinf</th><th>Status</th><th>Ação</th></tr></thead>
