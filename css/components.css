@@ -306,3 +306,26 @@
   .client-list-section.is-expanded .section-heading { margin:0 -2px 8px; padding:2px 2px 8px; }
   .client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 260px); }
 }
+
+@media (max-width:700px) {
+  .month-context-bar { align-items:center; text-align:center; }
+  .month-context-bar > div:first-child { width:100%; justify-content:center; }
+  .month-context-actions { align-items:center; width:100%; }
+  .competence-selectors { width:auto; justify-content:center; gap:8px; }
+  .competence-selectors .month-select-field { flex:0 0 auto; justify-content:center; gap:6px; }
+  .competence-selectors #overview-year-select { flex:0 0 78px; width:78px; min-width:78px; }
+  .competence-selectors #overview-month-select { flex:0 0 136px; width:136px; min-width:136px; }
+  .month-new-button { align-self:center; }
+}
+
+@media (max-width:700px) {
+  .competence-selectors #overview-year-select { flex-basis:94px; width:94px; min-width:94px; }
+  .competence-selectors #overview-month-select { flex-basis:132px; width:132px; min-width:132px; }
+}
+
+@media (max-width:700px) {
+  .competence-selectors { gap:6px; }
+  .competence-selectors .month-select-field { gap:4px; }
+  .competence-selectors #overview-year-select { flex-basis:88px; width:88px; min-width:88px; padding-right:24px; padding-left:10px; }
+  .competence-selectors #overview-month-select { flex-basis:124px; width:124px; min-width:124px; padding-right:24px; padding-left:10px; }
+}
