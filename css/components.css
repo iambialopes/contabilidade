@@ -279,3 +279,10 @@
 .client-table tbody tr:last-child td { padding-bottom: 22px; }
 .client-actions { min-width: 154px; padding-right: 24px !important; padding-left: 22px !important; }
 .client-sheet-button { margin-right: 10px; }
+
+.competence-selectors { display:flex; align-items:center; gap:10px; }
+.competence-selectors .month-select-field { gap:8px; }
+.competence-selectors #overview-year-select { min-width:88px; }
+.competence-selectors #overview-month-select { min-width:142px; }
+@media (max-width:900px) { .competence-selectors { gap:8px; } .competence-selectors .month-select-field { gap:6px; } }
+@media (max-width:700px) { .competence-selectors { width:100%; justify-content:space-between; } .competence-selectors .month-select-field { flex:1; } .competence-selectors .month-select-field select { min-width:0; width:100%; } }

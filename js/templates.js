@@ -13,7 +13,7 @@ function renderNavigation(departments, currentPage) {
   `).join('');
 }
 
-function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selectedMonth, months, canDeleteSelectedMonth }) {
+function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selectedMonth, selectedYear, months, canDeleteSelectedMonth }) {
   return `
     <section class="paper-card">
       <div class="hero-copy">
@@ -27,7 +27,7 @@ function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selec
     <section class="month-context-bar">
       <div><p class="eyebrow">Competência em análise</p><strong>${selectedMonth}</strong><span>Consulte a situação dos clientes conforme o mês selecionado.</span></div>
       <div class="month-context-actions">
-        ${monthSelect('overview-month-select', selectedMonth, months)}
+        ${competenceSelectors(selectedMonth, selectedYear, months)}
         <button class="secondary-button month-new-button" type="button" data-action="new-competence">＋ Nova competência</button>
         ${canDeleteSelectedMonth ? '<button class="secondary-button month-delete-button" type="button" data-action="delete-competence">Excluir competência</button>' : ''}
       </div>
@@ -161,15 +161,20 @@ function renderPrintReport(clients, filters, searchTerm = '', selectedKeys = nul
   `;
 }
 
-function monthSelect(id, selectedMonth, months) {
-  const groups = months.reduce((accumulator, month) => {
-    const year = String(month).split(/\s+/).pop();
-    accumulator[year] ||= [];
-    accumulator[year].push(month);
-    return accumulator;
-  }, {});
-  const options = Object.entries(groups).map(([year, yearMonths]) => `<optgroup label="20${year}">${yearMonths.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('')}</optgroup>`).join('');
-  return `<label class="month-select-field"><span>Mês</span><select id="${id}" aria-label="Selecionar mês">${options}</select></label>`;
+function getCompetenceYear(label) {
+  const yearToken = String(label || '').trim().split(/\s+/).pop();
+  const year = Number(yearToken);
+  return yearToken.length === 2 ? 2000 + year : year;
+}
+
+function competenceSelectors(selectedMonth, selectedYear, months) {
+  const sortedMonths = [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b));
+  const years = [...new Set(sortedMonths.map(getCompetenceYear).filter(Boolean))].sort((a, b) => a - b);
+  const activeYear = Number(selectedYear) || getCompetenceYear(selectedMonth) || years[years.length - 1];
+  const monthsForYear = sortedMonths.filter((month) => getCompetenceYear(month) === activeYear);
+  const yearOptions = years.map((year) => `<option value="${year}" ${year === activeYear ? 'selected' : ''}>${year}</option>`).join('');
+  const monthOptions = monthsForYear.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('');
+  return `<div class="competence-selectors"><label class="month-select-field"><span>Ano</span><select id="overview-year-select" aria-label="Selecionar ano">${yearOptions}</select></label><label class="month-select-field"><span>Mês</span><select id="overview-month-select" aria-label="Selecionar mês">${monthOptions}</select></label></div>`;
 }
 
 function renderDeleteCompetenceConfirmation(month) {

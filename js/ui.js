@@ -102,6 +102,7 @@ function getPageTemplate() {
       activeCount: getVisibleClients().filter((client) => client.active).length,
       totalCount: getVisibleClients().length,
       selectedMonth: state.selectedMonth,
+      selectedYear: getCompetenceYear(state.selectedMonth),
       months: [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b)),
       canDeleteSelectedMonth: !originalMonthKeys.has(state.selectedMonth)
     });
@@ -395,7 +396,25 @@ function bindClientControls() {
   const filterSelects = document.querySelectorAll('.client-filter');
   const clearFiltersButton = document.querySelector('#clear-client-filters');
   const exportPdfButton = document.querySelector('#export-clients-pdf');
+  const yearSelectElement = document.querySelector('#overview-year-select');
   const monthSelectElement = document.querySelector('#overview-month-select');
+  const resetClientFilters = () => {
+    state.searchTerm = '';
+    state.filters = { city: '', activity: '', tax: '', payroll: '', fiscalClosing: '', status: 'active' };
+  };
+
+  yearSelectElement?.addEventListener('change', (event) => {
+    const selectedYear = Number(event.target.value);
+    const yearMonths = [...months]
+      .filter((month) => getCompetenceYear(month) === selectedYear)
+      .sort((a, b) => monthSortValue(a) - monthSortValue(b));
+    if (!yearMonths.length) return;
+    state.selectedMonth = yearMonths[0];
+    resetClientFilters();
+    const visibleClients = getVisibleClients();
+    if (!visibleClients.some((client) => client.cnpj === state.selectedClientCnpj)) state.selectedClientCnpj = visibleClients[0]?.cnpj || '';
+    renderApp();
+  });
 
   monthSelectElement?.addEventListener('change', (event) => {
     state.selectedMonth = event.target.value;
