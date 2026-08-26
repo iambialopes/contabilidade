@@ -345,3 +345,24 @@
 .summary-sector-mark { border:0; padding:0; cursor:pointer; transition:transform .18s var(--ease), background .18s var(--ease); }
 .summary-sector-mark:hover, .summary-sector-mark:focus-visible { background:#E7EDE1; color:var(--olive-dark); transform:translateY(-1px); outline:none; }
 .summary-sector-mark:focus-visible { box-shadow:0 0 0 3px #DCE5D4; }
+
+/* Lista de clientes do setor: painel mais limpo, legível e sem recorte. */
+.dept-hero { overflow:visible; }
+.client-context { width:min(330px, calc(100% - 56px)); min-width:0; padding:18px; border:1px solid #E2E5DC; box-shadow:0 12px 28px rgba(70, 82, 61, .08); }
+.client-context > .eyebrow { margin:0 0 10px; }
+.department-client-picker { margin-top:0; }
+.department-client-results { max-height:188px; margin-top:8px; border-color:#E2E5DC; border-radius:11px; box-shadow:inset 0 1px 0 #ffffff, 0 4px 12px rgba(70, 82, 61, .05); scrollbar-color:#C8D3BE transparent; scrollbar-width:thin; }
+.department-client-result { gap:4px; min-height:48px; padding:10px 12px; transition:background .16s var(--ease), box-shadow .16s var(--ease); }
+.department-client-result strong { color:#4B5748; font-size:11px; line-height:1.25; }
+.department-client-result small { color:#8A9184; font-size:9px; line-height:1.25; }
+.department-client-result.selected { background:#EDF3E9; box-shadow:inset 3px 0 0 var(--olive); }
+.client-context > small:last-child { display:flex; align-items:center; gap:6px; margin-top:11px; padding-top:10px; border-top:1px solid #E7E8E1; color:#7D8977; font-size:10px; }
+@media (max-width:1100px) {
+  .dept-hero { overflow:visible; }
+  .dept-hero .client-context { position:static; width:100%; max-width:none; margin-top:24px; }
+  .department-client-results { max-height:190px; }
+}
+@media (max-width:700px) {
+  .client-context { padding:15px; }
+  .department-client-results { max-height:175px; }
+}
