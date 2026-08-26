@@ -341,3 +341,7 @@
   .competence-selectors #overview-month-select { min-width:142px; }
   .month-new-button, .month-delete-button { flex:0 0 auto; }
 }
+
+.summary-sector-mark { border:0; padding:0; cursor:pointer; transition:transform .18s var(--ease), background .18s var(--ease); }
+.summary-sector-mark:hover, .summary-sector-mark:focus-visible { background:#E7EDE1; color:var(--olive-dark); transform:translateY(-1px); outline:none; }
+.summary-sector-mark:focus-visible { box-shadow:0 0 0 3px #DCE5D4; }

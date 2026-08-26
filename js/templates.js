@@ -320,7 +320,7 @@ function renderLowerPanels(selectedClient) {
       <div class="dashboard-sector-grid summary-sector-grid">
         ${departmentSummary.map((department) => `
           <article class="dashboard-sector-card summary-sector-card ${department.accent}">
-            <div class="dashboard-sector-heading"><div><p class="eyebrow">${department.eyebrow}</p><h4>${department.label}</h4></div><span class="summary-sector-mark">↗</span></div>
+            <div class="dashboard-sector-heading"><div><p class="eyebrow">${department.eyebrow}</p><h4>${department.label}</h4></div><button type="button" class="summary-sector-mark" data-page="${department.key}" aria-label="Abrir setor ${department.label}">↗</button></div>
             <strong class="summary-sector-value">${department.value}</strong>
             <p class="dashboard-sector-meta">${department.detail}</p>
             <button class="department-summary-link" data-page="${department.key}">Abrir setor</button>
