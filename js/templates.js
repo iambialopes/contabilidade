@@ -353,7 +353,7 @@ function renderDepartment({ department, moduleData, selectedClient, clients }) {
         <input id="department-client-search" type="search" value="${selectedClient.name}" placeholder="Nome, CNPJ ou cidade" autocomplete="off" aria-label="Pesquisar cliente para ${department.label}">
       </label>
       <div class="department-client-results" id="department-client-results" role="listbox" aria-label="Resultados de clientes">
-        ${sortedClients.map((client) => `<button type="button" class="department-client-result ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}" data-department-client="${client.cnpj}" data-search-text="${`${client.name} ${client.cnpj} ${client.city}`.toLowerCase()}"><strong>${client.name}</strong><small>${client.cnpj} · ${client.city}</small></button>`).join('')}
+        ${sortedClients.map((client) => `<button type="button" class="department-client-result ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}" data-department-client="${client.cnpj}" data-search-text="${`${client.name} ${client.cnpj} ${client.city}`.toLowerCase()}"><strong class="department-client-name">${client.name}</strong><span class="department-client-details"><small>${client.cnpj}</small><small>${client.city}</small></span></button>`).join('')}
       </div>
       <small class="department-client-metric">${moduleData.metric} ${moduleData.metricLabel}</small>
     </section>
