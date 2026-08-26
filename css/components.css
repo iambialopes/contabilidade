@@ -366,3 +366,20 @@
   .client-context { padding:15px; }
   .department-client-results { max-height:175px; }
 }
+
+/* Painel de clientes separado do hero do departamento. */
+.department-client-panel { position:relative; right:auto; bottom:auto; width:100%; min-width:0; max-width:none; margin:18px 0 30px; padding:20px 22px; border:1px solid #E2E5DC; border-radius:18px; background:var(--paper); box-shadow:var(--shadow); }
+.department-client-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.department-client-panel-heading .eyebrow { margin:0; }
+.department-client-panel-heading h3 { margin:5px 0 0; color:var(--ink); font:22px/1.15 Georgia, serif; }
+.department-client-count { flex:0 0 auto; padding:7px 10px; border-radius:999px; background:var(--olive-soft); color:var(--olive-dark); font-size:10px; font-weight:800; }
+.department-client-panel .department-client-picker { max-width:520px; }
+.department-client-panel .department-client-results { max-height:230px; }
+.department-client-panel .department-client-metric { display:flex; align-items:center; margin-top:12px; padding-top:11px; border-top:1px solid #E7E8E1; color:#7D8977; font-size:10px; }
+@media (max-width:700px) {
+  .department-client-panel { margin:16px 0 24px; padding:17px 15px; }
+  .department-client-panel-heading { align-items:flex-start; flex-direction:column; gap:10px; }
+  .department-client-count { align-self:flex-start; }
+  .department-client-panel .department-client-picker { max-width:none; }
+  .department-client-panel .department-client-results { max-height:205px; }
+}

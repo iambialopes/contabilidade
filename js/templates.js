@@ -338,17 +338,24 @@ function renderDepartment({ department, moduleData, selectedClient, clients }) {
       <p class="eyebrow">${moduleData.eyebrow}</p>
       <h2>Departamento ${department.label}</h2>
       <p>${moduleData.intro}</p>
-      <div class="client-context">
-        <p class="eyebrow">Cliente em foco</p>
-        <label class="department-client-picker">
-          <span>Pesquisar empresa</span>
-          <input id="department-client-search" type="search" value="${selectedClient.name}" placeholder="Nome, CNPJ ou cidade" autocomplete="off" aria-label="Pesquisar cliente para ${department.label}">
-        </label>
-        <div class="department-client-results" id="department-client-results" role="listbox" aria-label="Resultados de clientes">
-          ${sortedClients.map((client) => `<button type="button" class="department-client-result ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}" data-department-client="${client.cnpj}" data-search-text="${`${client.name} ${client.cnpj} ${client.city}`.toLowerCase()}"><strong>${client.name}</strong><small>${client.cnpj} · ${client.city}</small></button>`).join('')}
+    </section>
+
+    <section class="client-context department-client-panel">
+      <div class="department-client-panel-heading">
+        <div>
+          <p class="eyebrow">Cliente em foco</p>
+          <h3>Selecione uma empresa</h3>
         </div>
-        <small>${moduleData.metric} ${moduleData.metricLabel}</small>
+        <span class="department-client-count">${sortedClients.length} clientes</span>
       </div>
+      <label class="department-client-picker">
+        <span>Pesquisar empresa</span>
+        <input id="department-client-search" type="search" value="${selectedClient.name}" placeholder="Nome, CNPJ ou cidade" autocomplete="off" aria-label="Pesquisar cliente para ${department.label}">
+      </label>
+      <div class="department-client-results" id="department-client-results" role="listbox" aria-label="Resultados de clientes">
+        ${sortedClients.map((client) => `<button type="button" class="department-client-result ${client.cnpj === selectedClient.cnpj ? 'selected' : ''}" data-department-client="${client.cnpj}" data-search-text="${`${client.name} ${client.cnpj} ${client.city}`.toLowerCase()}"><strong>${client.name}</strong><small>${client.cnpj} · ${client.city}</small></button>`).join('')}
+      </div>
+      <small class="department-client-metric">${moduleData.metric} ${moduleData.metricLabel}</small>
     </section>
 
     <div class="routine-heading">
