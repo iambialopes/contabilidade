@@ -295,3 +295,14 @@
 .client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 245px); }
 .client-list-section.is-expanded .client-table tbody tr:last-child td { padding-bottom:28px; }
 @media (max-width:700px) { .section-heading-actions { width:100%; justify-content:flex-start; gap:12px; } .client-list-section.is-expanded { padding:18px 14px 28px; } .client-list-section.is-expanded .section-heading { margin:0 -4px 14px; padding:6px 4px 12px; } .client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 260px); } }
+
+/* Modo expandido: prioriza a tabela e mantém apenas um respiro mínimo. */
+.client-list-section.is-expanded { box-sizing:border-box; overflow:hidden; padding:8px 14px 12px; }
+.client-list-section.is-expanded .section-heading { margin:0 -2px 8px; padding:2px 2px 8px; }
+.client-list-section.is-expanded .client-table { min-height:calc(100vh - 82px); }
+.client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 178px); }
+@media (max-width:700px) {
+  .client-list-section.is-expanded { overflow:auto; padding:8px 10px 14px; }
+  .client-list-section.is-expanded .section-heading { margin:0 -2px 8px; padding:2px 2px 8px; }
+  .client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 260px); }
+}
