@@ -118,7 +118,7 @@ function getPageTemplate() {
 
 function getClientsSection() {
   const visibleClients = getVisibleClients();
-  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.filters, visibleClients);
+  return renderClientsSection(renderClientRows(getFilteredClients(), state.selectedClientCnpj), state.filters, visibleClients, state.clientListExpanded);
 }
 
 function monthSortValue(label) {
@@ -342,6 +342,13 @@ function bindActions() {
 
   document.querySelectorAll('[data-action="new-client"]').forEach((element) => {
     element.addEventListener('click', openModal);
+  });
+
+  document.querySelectorAll('[data-action="toggle-client-list"]').forEach((element) => {
+    element.addEventListener('click', () => {
+      state.clientListExpanded = !state.clientListExpanded;
+      renderApp();
+    });
   });
 
   document.querySelectorAll('[data-action="new-competence"]').forEach((element) => {

@@ -286,3 +286,12 @@
 .competence-selectors #overview-month-select { min-width:142px; }
 @media (max-width:900px) { .competence-selectors { gap:8px; } .competence-selectors .month-select-field { gap:6px; } }
 @media (max-width:700px) { .competence-selectors { width:100%; justify-content:space-between; } .competence-selectors .month-select-field { flex:1; } .competence-selectors .month-select-field select { min-width:0; width:100%; } }
+
+.section-heading-actions { display:flex; align-items:center; justify-content:flex-end; gap:16px; flex-wrap:wrap; }
+.client-expand-button { display:inline-flex; align-items:center; gap:5px; }
+.client-list-section.is-expanded { position:fixed; inset:0; z-index:30; overflow:auto; padding:28px clamp(24px, 5vw, 72px) 42px; background:var(--paper); }
+.client-list-section.is-expanded .section-heading { position:sticky; top:0; z-index:4; margin:0 -8px 18px; padding:10px 8px 16px; background:var(--paper); }
+.client-list-section.is-expanded .client-table { min-height:calc(100vh - 150px); }
+.client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 245px); }
+.client-list-section.is-expanded .client-table tbody tr:last-child td { padding-bottom:28px; }
+@media (max-width:700px) { .section-heading-actions { width:100%; justify-content:flex-start; gap:12px; } .client-list-section.is-expanded { padding:18px 14px 28px; } .client-list-section.is-expanded .section-heading { margin:0 -4px 14px; padding:6px 4px 12px; } .client-list-section.is-expanded .table-scroll { max-height:calc(100vh - 260px); } }

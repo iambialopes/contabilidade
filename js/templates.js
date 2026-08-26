@@ -55,15 +55,18 @@ function summaryCard(icon, label, value, detail) {
   `;
 }
 
-function renderClientsSection(rowsHtml, filters, clients) {
+function renderClientsSection(rowsHtml, filters, clients, isExpanded = false) {
   return `
-    <section>
+    <section class="client-list-section${isExpanded ? ' is-expanded' : ''}">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Base de clientes</p>
           <h2>Empresas acompanhadas</h2>
         </div>
-        <button class="text-button" data-action="new-client">＋ Adicionar cliente</button>
+        <div class="section-heading-actions">
+          <button class="text-button client-expand-button" type="button" data-action="toggle-client-list" aria-pressed="${isExpanded}">${isExpanded ? '⤢ Recolher lista' : '⛶ Expandir lista'}</button>
+          <button class="text-button" data-action="new-client">＋ Adicionar cliente</button>
+        </div>
       </div>
 
       <div class="client-table">

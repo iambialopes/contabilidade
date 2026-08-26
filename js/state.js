@@ -4,6 +4,7 @@ window.CorreaState = {
   selectedClientCnpj: '42.910.621/0001-52',
   selectedMonth: 'AGOSTO 26',
   activeOnly: true,
+  clientListExpanded: false,
   searchTerm: '',
   filters: {
     city: '',
