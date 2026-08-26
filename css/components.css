@@ -329,3 +329,15 @@
   .competence-selectors #overview-year-select { flex-basis:88px; width:88px; min-width:88px; padding-right:24px; padding-left:10px; }
   .competence-selectors #overview-month-select { flex-basis:124px; width:124px; min-width:124px; padding-right:24px; padding-left:10px; }
 }
+
+/* Tablet: período e controles permanecem alinhados em duas colunas. */
+@media (min-width:701px) and (max-width:1100px) {
+  .month-context-bar { display:grid; grid-template-columns:minmax(180px,1fr) auto; align-items:center; column-gap:24px; }
+  .month-context-bar > div:first-child { min-width:0; }
+  .month-context-actions { align-items:center; flex-wrap:nowrap; justify-content:flex-end; gap:10px; }
+  .competence-selectors { flex-wrap:nowrap; gap:8px; }
+  .competence-selectors .month-select-field { gap:6px; }
+  .competence-selectors #overview-year-select { min-width:88px; }
+  .competence-selectors #overview-month-select { min-width:142px; }
+  .month-new-button, .month-delete-button { flex:0 0 auto; }
+}
