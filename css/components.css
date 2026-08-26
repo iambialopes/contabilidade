@@ -273,3 +273,9 @@
 .month-delete-button { border-color:#E5C8BF; color:#A85F52; white-space:nowrap; }
 .month-delete-button:hover, .month-delete-button:focus-visible { border-color:#D9A99D; background:#F8E9E4; color:#985448; outline:none; }
 @media (max-width:900px) { .month-context-actions { gap:8px; } .month-new-button, .month-delete-button { font-size:11px; padding:9px 10px; } }
+
+/* Respiro adicional na base da tabela e entre as ações da linha. */
+.table-scroll { padding-bottom: 10px; }
+.client-table tbody tr:last-child td { padding-bottom: 22px; }
+.client-actions { min-width: 154px; padding-right: 24px !important; padding-left: 22px !important; }
+.client-sheet-button { margin-right: 10px; }
