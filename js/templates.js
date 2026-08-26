@@ -26,7 +26,10 @@ function renderOverview({ clientsHtml, lowerHtml, activeCount, totalCount, selec
 
     <section class="month-context-bar">
       <div><p class="eyebrow">Competência em análise</p><strong>${selectedMonth}</strong><span>Consulte a situação dos clientes conforme o mês selecionado.</span></div>
-      ${monthSelect('overview-month-select', selectedMonth, months)}
+      <div class="month-context-actions">
+        ${monthSelect('overview-month-select', selectedMonth, months)}
+        <button class="secondary-button month-new-button" type="button" data-action="new-competence">＋ Nova competência</button>
+      </div>
     </section>
 
     <section class="summary-grid">
@@ -159,6 +162,61 @@ function renderPrintReport(clients, filters, searchTerm = '', selectedKeys = nul
 
 function monthSelect(id, selectedMonth, months) {
   return `<label class="month-select-field"><span>Mês</span><select id="${id}" aria-label="Selecionar mês">${months.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('')}</select></label>`;
+}
+
+function reviewSelect(index, field, value, options) {
+  return `<select class="competence-review-select" data-review-index="${index}" data-review-field="${field}" aria-label="Alterar ${field}">${options.map((option) => `<option value="${option}" ${String(option) === String(value) ? 'selected' : ''}>${option || 'Não informado'}</option>`).join('')}</select>`;
+}
+
+function renderNewCompetenceModal({ sourceMonth, targetMonth, clients }) {
+  const safeSourceMonth = escapeHtml(sourceMonth);
+  const safeTargetMonth = escapeHtml(targetMonth);
+  return `
+    <div class="modal-backdrop" id="competence-modal-backdrop">
+      <div class="modal competence-modal" role="dialog" aria-modal="true" aria-labelledby="competence-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Nova competência</p>
+            <h2 id="competence-title">Preparar nova competência</h2>
+            <p class="modal-description">A situação de ${safeSourceMonth} foi copiada para conferência. Revise a carteira e faça as alterações necessárias antes de criar o próximo mês.</p>
+          </div>
+          <button class="close" id="close-competence-modal" aria-label="Fechar">×</button>
+        </div>
+        <div class="competence-target-field"><label for="competence-target-month">Nome da nova competência</label><input id="competence-target-month" value="${safeTargetMonth}" placeholder="Ex.: OUTUBRO 26" autocomplete="off"><span>O mês será criado somente depois da confirmação.</span></div>
+        <div class="competence-review-note"><strong>${clients.length} clientes serão levados para a nova competência.</strong><span>Revise as situações abaixo; as alterações só serão salvas ao confirmar a nova competência.</span></div>
+        <div class="competence-review-toolbar"><p class="form-section-label">Conferência da carteira</p><button class="text-button" id="competence-add-client" type="button">＋ Adicionar cliente</button></div>
+        <div class="competence-table-scroll">
+          <table class="competence-table">
+            <thead><tr><th>Cliente</th><th>CNPJ ou CPF</th><th>Tributação</th><th>Atividade</th><th>Informações folha</th><th>Fechamento fiscal</th><th>Sintegra</th><th>DSTDA</th><th>Folha pagamento</th><th>Balancete</th><th>EFD Reinf</th><th>Status</th><th>Ação</th></tr></thead>
+            <tbody>
+              ${clients.length ? clients.map((client, index) => `
+                <tr data-competence-row="${index}">
+                  <td><strong>${escapeHtml(client.name)}</strong></td>
+                  <td>${escapeHtml(client.cnpj)}</td>
+                  <td>${reviewSelect(index, 'tax', client.tax, ['MEI', 'PF', 'PRESUMIDO', 'SIMPLES NACIONAL', 'SN COM FATOR R'])}</td>
+                  <td>${reviewSelect(index, 'activity', client.activity, ['ASSOCIAÇÃO', 'COMERCIO', 'COMÉRCIO E SERVIÇO', 'CONDOMINIO', 'PESSOA FISICA', 'SERVIÇO'])}</td>
+                  <td>${reviewSelect(index, 'payrollInfo', client.payrollInfo, ['FUNCIONÁRIOS', 'PRÓ-LABORE', 'PRÓ-LABORE E FUNCIONÁRIOS', 'SEM FOLHA'])}</td>
+                  <td>${reviewSelect(index, 'fiscalClosing', client.fiscalClosing, ['EM ANÁLISE', 'ENVIADO', 'NÃO FEITO', 'SEM MOVIMENTO'])}</td>
+                  <td>${reviewSelect(index, 'sintegra', client.sintegra, ['CLIENTE NOVO', 'DESOBRIGADO', 'ENVIAR', 'MEI - DESOBRIGADO', 'SIMPLES NACIONAL - SERVIÇO'])}</td>
+                  <td>${reviewSelect(index, 'dstda', client.dstda, ['CLIENTE NOVO', 'DESOBRIGADO', 'MEI - DESOBRIGADO', 'SIMPLES NACIONAL - SERVIÇO', 'VERIFICAR OBRIGATORIEDADE'])}</td>
+                  <td>${reviewSelect(index, 'payrollStatus', client.payrollStatus, ['ENVIADO - DCTFWEB', 'ENVIADO- FUNCIONARIOS', 'ENVIADO- PRO LABORE', 'NÃO FEITO', 'SEM FOLHA'])}</td>
+                  <td>${reviewSelect(index, 'balance', client.balance, ['NÃO FEITO MEI', 'NÃO FEITO PRESUMIDO', 'NÃO FEITO SN', 'SEM ESCRITURAÇÃO', 'SEM MOVIMENTO'])}</td>
+                  <td>${reviewSelect(index, 'efdReinf', client.efdReinf, ['DISPENSA', 'VERIFICAR CONTÁBIL - DISTRIBUIÇÃO'])}</td>
+                  <td>${reviewSelect(index, 'active', client.active ? 'ATIVO' : 'INATIVO', ['ATIVO', 'INATIVO'])}</td>
+                  <td><button class="delete-client competence-remove-client" type="button" data-competence-remove="${index}" title="Remover ${escapeHtml(client.name)}" aria-label="Remover ${escapeHtml(client.name)}">×</button></td>
+                </tr>
+              `).join('') : '<tr><td colspan="13" class="competence-empty">Nenhum cliente será levado para esta competência.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <p class="form-error" id="competence-error" role="alert"></p>
+        <div class="modal-actions">
+          <button class="secondary-button" id="cancel-competence-modal" type="button">Cancelar</button>
+          <button class="primary-button" id="confirm-competence-modal" type="button">Criar competência</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function clientFilterSelect(field, label, selectedValue, values) {

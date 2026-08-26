@@ -235,3 +235,27 @@
 .month-select-field { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .month-select-field select { min-width:142px; border:1px solid var(--line); border-radius:10px; padding:10px 34px 10px 12px; color:var(--ink); background:var(--cream); font:inherit; letter-spacing:normal; text-transform:none; }
 @media (max-width:700px) { .month-context-bar { align-items:stretch; flex-direction:column; gap:14px; } .month-select-field { justify-content:space-between; } .month-select-field select { flex:1; } }
+
+.month-context-actions { display:flex; align-items:end; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
+.month-new-button { white-space:nowrap; }
+.competence-modal { width:min(1280px, calc(100vw - 34px)); }
+.competence-target-field { display:flex; align-items:center; gap:12px; margin-top:20px; padding:14px 16px; border:1px solid #E5E1D8; border-radius:13px; background:#F8F7F2; }
+.competence-target-field label { color:#66715B; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.competence-target-field input { min-width:180px; height:38px; padding:0 11px; border:1px solid #D9DED2; border-radius:9px; background:#FFF; color:#52604D; font-size:12px; font-weight:700; outline:none; }
+.competence-target-field input:focus { border-color:#A9B69C; box-shadow:0 0 0 3px #DCE5D4; }
+.competence-target-field span { color:#899184; font-size:10px; }
+.competence-review-note { display:flex; flex-direction:column; gap:4px; margin-top:14px; padding:13px 15px; border-left:3px solid var(--peach); background:#F9EFEA; color:#7E6E67; font-size:11px; }
+.competence-review-note strong { color:#765F57; font-size:12px; }
+.competence-review-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:20px; }
+.competence-review-toolbar .form-section-label { flex:1; margin:0; }
+.competence-table-scroll { max-height:52vh; margin-top:0; overflow:auto; border:1px solid #E5E1D8; border-radius:13px; }
+.competence-table { min-width:1510px; width:100%; border-collapse:collapse; text-align:left; }
+.competence-table th { position:sticky; top:0; z-index:1; padding:11px 12px; border-bottom:1px solid #E5E1D8; background:#F6F4EE; color:#949A90; font-size:9px; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+.competence-table td { padding:9px 12px; border-top:1px solid #F0EDE6; color:#727A70; font-size:11px; vertical-align:middle; }
+.competence-table td:first-child { min-width:185px; color:#4B5748; white-space:nowrap; }
+.competence-table td:nth-child(2) { min-width:140px; white-space:nowrap; }
+.competence-review-select { min-width:130px; max-width:175px; height:33px; padding:0 24px 0 8px; border:1px solid #E2DED5; border-radius:8px; background:#F5F3ED; color:#626B5F; font-size:10px; }
+.competence-review-select:focus { border-color:#A9B69C; outline:none; box-shadow:0 0 0 3px #DCE5D4; }
+.competence-remove-client { margin:0; }
+.competence-empty { padding:32px !important; text-align:center; }
+@media (max-width:700px) { .month-context-actions { align-items:stretch; flex-direction:column; } .month-context-actions .month-select-field { justify-content:space-between; } .month-context-actions select { flex:1; } .competence-target-field { align-items:stretch; flex-direction:column; } .competence-target-field input { width:100%; } }

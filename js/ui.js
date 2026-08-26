@@ -1,7 +1,10 @@
 /* Corrêa Controle Interno — Renderização e eventos de interface. */
 
 const { clients, departments, departmentsData, monthHistory = {}, months = [] } = window.CorreaData;
+const originalMonthKeys = new Set(months);
 const state = window.CorreaState;
+let competenceDraft = null;
+let competenceTargetMonth = '';
 const pageContent = document.querySelector('#page-content');
 const navigation = document.querySelector('#department-nav');
 const pageTitle = document.querySelector('#page-title');
@@ -11,6 +14,12 @@ const printRoot = document.querySelector('#print-root');
 const customClientsStorageKey = 'correa-controle-interno-custom-clients';
 const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
 const routineProgressStorageKey = 'correa-controle-interno-routine-progress';
+const customCompetenciesStorageKey = 'correa-controle-interno-custom-competencies';
+const savedCompetencies = loadSavedCompetencies();
+Object.entries(savedCompetencies).forEach(([month, snapshot]) => {
+  monthHistory[month] = snapshot;
+  if (!months.includes(month)) months.push(month);
+});
 const savedClients = loadSavedClients();
 const deletedClientCnpjs = loadDeletedClientCnpjs();
 savedClients.forEach((savedClient) => {
@@ -145,6 +154,114 @@ function loadRoutineProgress() {
   try { return JSON.parse(localStorage.getItem(routineProgressStorageKey) || '{}'); } catch (error) { return {}; }
 }
 
+function loadSavedCompetencies() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(customCompetenciesStorageKey) || '{}');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function saveCompetenciesToStorage() {
+  const customCompetencies = {};
+  months.filter((month) => !originalMonthKeys.has(month)).forEach((month) => {
+    customCompetencies[month] = monthHistory[month];
+  });
+  localStorage.setItem(customCompetenciesStorageKey, JSON.stringify(customCompetencies));
+}
+
+function getNextCompetenceLabel(sourceMonth) {
+  const parts = String(sourceMonth).trim().toUpperCase().split(/\s+/);
+  const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  const aliases = { JAN: 0, JANEIRO: 0, FEV: 1, FEVEREIRO: 1, MAR: 2, MARÇO: 2, ABR: 3, ABRIL: 3, MAI: 4, MAIO: 4, JUN: 5, JUNHO: 5, JUL: 6, JULHO: 6, AGO: 7, AGOSTO: 7, SET: 8, SETEMBRO: 8, OUT: 9, OUTUBRO: 9, NOV: 10, NOVEMBRO: 10, DEZ: 11, DEZEMBRO: 11 };
+  const monthIndex = aliases[parts[0]] ?? 0;
+  const parsedYear = Number(parts[1] || '26');
+  const year = parsedYear + (monthIndex === 11 ? 1 : 0);
+  return `${monthNames[(monthIndex + 1) % 12]} ${String(year).slice(-2)}`;
+}
+
+function normalizeCompetenceLabel(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+}
+
+function openNewCompetenceModal() {
+  const sourceMonth = state.selectedMonth;
+  competenceDraft = getVisibleClients().map((client) => ({ ...client }));
+  competenceTargetMonth = getNextCompetenceLabel(sourceMonth);
+  renderCompetenceReview(sourceMonth);
+}
+
+function renderCompetenceReview(sourceMonth = state.selectedMonth) {
+  modalRoot.innerHTML = renderNewCompetenceModal({ sourceMonth, targetMonth: competenceTargetMonth, clients: competenceDraft || [] });
+  const close = () => { competenceDraft = null; competenceTargetMonth = ''; closeModal(); };
+  document.querySelector('#close-competence-modal')?.addEventListener('click', close);
+  document.querySelector('#cancel-competence-modal')?.addEventListener('click', close);
+  document.querySelector('#competence-target-month')?.addEventListener('input', (event) => {
+    competenceTargetMonth = event.target.value;
+  });
+  document.querySelectorAll('.competence-review-select').forEach((select) => {
+    select.addEventListener('change', (event) => {
+      const index = Number(event.target.dataset.reviewIndex);
+      const field = event.target.dataset.reviewField;
+      if (!competenceDraft[index]) return;
+      competenceDraft[index][field] = field === 'active' ? event.target.value === 'ATIVO' : event.target.value;
+      if (field === 'payrollInfo') competenceDraft[index].payroll = event.target.value === 'SEM FOLHA' ? 'Não' : 'Sim';
+    });
+  });
+  document.querySelectorAll('[data-competence-remove]').forEach((button) => {
+    button.addEventListener('click', () => {
+      competenceDraft.splice(Number(button.dataset.competenceRemove), 1);
+      renderCompetenceReview(sourceMonth);
+    });
+  });
+  document.querySelector('#competence-add-client')?.addEventListener('click', openCompetenceClientModal);
+  document.querySelector('#confirm-competence-modal')?.addEventListener('click', () => confirmNewCompetence(sourceMonth));
+  document.querySelector('#competence-target-month')?.focus();
+}
+
+function openCompetenceClientModal() {
+  modalRoot.innerHTML = renderModal();
+  const close = () => renderCompetenceReview(state.selectedMonth);
+  document.querySelector('#close-modal')?.addEventListener('click', close);
+  document.querySelector('#cancel-modal')?.addEventListener('click', close);
+  document.querySelector('#save-modal')?.addEventListener('click', () => {
+    const client = collectClientFromForm();
+    if (!client) return;
+    const duplicated = competenceDraft.some((item) => normalizeDocument(item.cnpj) === normalizeDocument(client.cnpj));
+    if (duplicated) {
+      document.querySelector('#form-error').textContent = 'Este cliente já está na revisão da nova competência.';
+      return;
+    }
+    competenceDraft.push(client);
+    renderCompetenceReview(state.selectedMonth);
+  });
+  document.querySelector('#client-name')?.focus();
+}
+
+function confirmNewCompetence(sourceMonth) {
+  const errorElement = document.querySelector('#competence-error');
+  const targetMonth = normalizeCompetenceLabel(competenceTargetMonth);
+  if (!/^(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ|JANEIRO|FEVEREIRO|MARÇO|ABRIL|MAIO|JUNHO|JULHO|AGOSTO|SETEMBRO|OUTUBRO|NOVEMBRO|DEZEMBRO)\s+\d{2,4}$/.test(targetMonth)) {
+    errorElement.textContent = 'Informe a competência no formato OUTUBRO 26.';
+    return;
+  }
+  if (months.includes(targetMonth)) {
+    errorElement.textContent = 'Essa competência já existe. Escolha outro mês ou ano.';
+    return;
+  }
+  monthHistory[targetMonth] = competenceDraft.map((client) => ({ ...client }));
+  months.push(targetMonth);
+  saveCompetenciesToStorage();
+  state.selectedMonth = targetMonth;
+  state.selectedClientCnpj = competenceDraft[0]?.cnpj || '';
+  competenceDraft = null;
+  competenceTargetMonth = '';
+  closeModal();
+  renderApp();
+  showToast(`${targetMonth} foi criada com a situação revisada.`);
+}
+
 function getDashboardData(selectedClient) {
   const progress = loadRoutineProgress()[selectedClient.cnpj] || {};
   const departmentItems = Object.entries(departmentsData).map(([key, moduleData]) => {
@@ -196,6 +313,10 @@ function bindActions() {
 
   document.querySelectorAll('[data-action="new-client"]').forEach((element) => {
     element.addEventListener('click', openModal);
+  });
+
+  document.querySelectorAll('[data-action="new-competence"]').forEach((element) => {
+    element.addEventListener('click', openNewCompetenceModal);
   });
 
   document.querySelectorAll('[data-action="open-sheet"]').forEach((element) => {
