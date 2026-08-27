@@ -339,6 +339,8 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalR
   const focusItems = [['notas', 'Notas'], ['apuracao', 'Apuração'], ['pgdas', 'PGDAS'], ['guia', 'Guia'], ['sintegra', 'Sintegra'], ['dstda', 'DSTDA'], ['livroEletronico', 'Livro eletrônico'], ['efdReinf', 'EFD Reinf']];
   return `
     <div class="fiscal-dashboard-shell">
+    <section class="fiscal-zone fiscal-focus-zone" aria-labelledby="fiscal-focus-zone-title">
+      <div class="fiscal-zone-heading"><div><p class="eyebrow">Acompanhamento individual</p><h3 id="fiscal-focus-zone-title">Cliente em foco</h3></div><span>1 empresa selecionada</span></div>
     <section class="fiscal-hero">
       <div><p class="eyebrow">Controle fiscal da competência</p><h2>Fiscal · ${selectedMonth}</h2><p>Acompanhe as obrigações de cada empresa, identifique pendências e registre o andamento do período.</p></div>
       <div class="fiscal-hero-client"><span>Cliente em foco desta tela</span><select id="fiscal-focus-client" aria-label="Selecionar cliente em foco">${[...clients].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')).map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient?.cnpj ? 'selected' : ''}>${client.name}</option>`).join('')}</select><small>${selectedClient?.cnpj || ''} · ${selectedClient?.city || ''}</small></div>
@@ -347,6 +349,9 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalR
       <div class="section-heading fiscal-focus-heading"><div><p class="eyebrow">Acompanhamento do cliente</p><h3>${focusRow?.name || 'Nenhum cliente selecionado'}</h3><small>${focusRow?.cnpj || ''} · ${focusRow?.city || ''} · ${focusRow?.tax || ''}</small></div><span class="fiscal-overall fiscal-overall-${statusClass(focusRow?.overall)}">${focusRow?.overall || 'Aguardando'}</span></div>
       <div class="fiscal-focus-grid">${focusItems.map(([key, label]) => `<div class="fiscal-focus-item"><span>${label}</span><strong class="fiscal-focus-status-${statusClass(focusRow?.[key])}">${focusRow?.[key] || 'Aguardando'}</strong></div>`).join('')}</div>
     </section>
+    </section>
+    <section class="fiscal-zone fiscal-overview-zone" aria-labelledby="fiscal-overview-zone-title">
+      <div class="fiscal-zone-heading"><div><p class="eyebrow">Painel do departamento</p><h3 id="fiscal-overview-zone-title">Visão geral do fiscal</h3></div><span>${selectedMonth} · ${fiscalRows.length} clientes acompanhados</span></div>
     <section class="fiscal-summary-grid">
       ${summaryCard('✓', 'Clientes em dia', String(summary.done), `de ${summary.total} acompanhados`)}
       ${summaryCard('!', 'Pontos de atenção', String(summary.attention), 'pendências ou análise')}
@@ -372,6 +377,7 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalR
       <div class="section-heading fiscal-list-heading"><div><p class="eyebrow">Consulta completa</p><h3>Todos os clientes</h3></div><span>${filteredRows.length} exibidos</span></div>
       <div class="fiscal-table-scroll"><table class="fiscal-table"><thead><tr><th>Cliente</th><th>Tributação</th><th>Notas</th><th>Apuração</th><th>PGDAS</th><th>Guia</th><th>Sintegra</th><th>DSTDA</th><th>Livro eletrônico</th><th>EFD Reinf</th><th>Situação geral</th></tr></thead><tbody>${filteredRows.map((row) => `<tr><td><strong>${row.name}</strong><small>${row.cnpj} · ${row.city}</small></td><td>${row.tax}</td><td>${selectStatus(row, 'notas')}</td><td>${selectStatus(row, 'apuracao')}</td><td>${selectStatus(row, 'pgdas')}</td><td>${selectStatus(row, 'guia')}</td><td>${selectStatus(row, 'sintegra')}</td><td>${selectStatus(row, 'dstda')}</td><td>${selectStatus(row, 'livroEletronico')}</td><td>${selectStatus(row, 'efdReinf')}</td><td><span class="fiscal-overall fiscal-overall-${statusClass(row.overall)}">${row.overall}</span></td></tr>`).join('') || '<tr><td colspan="11" class="fiscal-empty">Nenhum cliente encontrado para os filtros selecionados.</td></tr>'}</tbody></table></div>
       <div class="fiscal-table-footer"><span>${filteredRows.length} clientes exibidos</span><span>Competência ${selectedMonth}</span></div>
+    </section>
     </section>
     </div>`;
 }
