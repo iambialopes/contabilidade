@@ -336,6 +336,40 @@ function readFileAsDataUrl(file) {
     reader.readAsDataURL(file);
   });
 }
+function dataUrlToBlobUrl(dataUrl, fallbackType = 'application/octet-stream') {
+  const [metadata, payload] = String(dataUrl || '').split(',');
+  if (!metadata || !payload || !/^data:/i.test(metadata)) return '';
+  try {
+    const mime = metadata.match(/^data:([^;,]+)/i)?.[1] || fallbackType;
+    const binary = /;base64/i.test(metadata) ? atob(payload) : decodeURIComponent(payload);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    return URL.createObjectURL(new Blob([bytes], { type: mime }));
+  } catch (error) {
+    return '';
+  }
+}
+function openFiscalAttachment(file) {
+  const storedUrl = file?.dataUrl || file?.url;
+  if (!storedUrl) {
+    showToast('Este anexo não possui conteúdo para visualização.');
+    return;
+  }
+  const openedWindow = window.open('', '_blank');
+  if (!openedWindow) {
+    showToast('O navegador bloqueou a abertura do anexo. Permita pop-ups para este site.');
+    return;
+  }
+  openedWindow.opener = null;
+  const blobUrl = String(storedUrl).startsWith('data:') ? dataUrlToBlobUrl(storedUrl, file.type) : '';
+  const attachmentUrl = blobUrl || storedUrl;
+  try {
+    openedWindow.location.href = attachmentUrl;
+    if (blobUrl) window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  } catch (error) {
+    openedWindow.close();
+    showToast('Não foi possível abrir este anexo. Tente baixá-lo novamente.');
+  }
+}
 
 function loadSavedCompetencies() {
   try {
@@ -1037,13 +1071,7 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
   document.querySelectorAll('[data-fiscal-attachment-index]').forEach((attachmentButton) => {
     attachmentButton.addEventListener('click', () => {
       const attachment = detail.attachments?.[Number(attachmentButton.dataset.fiscalAttachmentIndex)];
-      const attachmentUrl = attachment?.dataUrl || attachment?.url;
-      if (!attachmentUrl) {
-        showToast('Este anexo não possui conteúdo para visualização.');
-        return;
-      }
-      const openedWindow = window.open(attachmentUrl, '_blank', 'noopener,noreferrer');
-      if (!openedWindow) showToast('O navegador bloqueou a abertura do anexo. Permita pop-ups para este site.');
+      openFiscalAttachment(attachment);
     });
   });
   document.querySelectorAll('[data-fiscal-attachment-delete-index]').forEach((deleteButton) => {
