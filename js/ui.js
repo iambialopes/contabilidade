@@ -65,6 +65,7 @@ function renderApp() {
   bindNavigation();
   bindActions();
   bindClientControls();
+  bindFiscalControls();
 }
 
 function renderPageTitle() {
@@ -90,6 +91,38 @@ function renderCurrentDate() {
   dateLabel.textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 }
 
+const fiscalStorageKey = 'correa-controle-interno-fiscal';
+function loadFiscalStore() { try { return JSON.parse(localStorage.getItem(fiscalStorageKey) || '{}'); } catch (error) { return {}; } }
+function saveFiscalStore(store) { localStorage.setItem(fiscalStorageKey, JSON.stringify(store)); }
+function fiscalStatus(value) {
+  const text = String(value || '').toUpperCase();
+  if (!text) return 'Aguardando';
+  if (/DESOBRIGADO|DISPENSA|SEM MOVIMENTO|SEM FOLHA/.test(text)) return 'Desobrigado';
+  if (/ENVIADO|FEITO|CONCLU/.test(text)) return 'Concluído';
+  if (/ANÁLISE|ANALISE|VERIFICAR|AGUARD/.test(text)) return 'Em análise';
+  if (/NÃO FEITO|NAO FEITO|CLIENTE NOVO|PENDENTE/.test(text)) return 'Pendente';
+  return 'Aguardando';
+}
+function getFiscalRows() {
+  const store = loadFiscalStore();
+  return getVisibleClients().map((client) => {
+    const defaults = { notas: 'Aguardando', apuracao: fiscalStatus(client.fiscalClosing), pgdas: ['MEI', 'PF'].includes(String(client.tax).toUpperCase()) ? 'Não se aplica' : fiscalStatus(client.fiscalClosing), guia: fiscalStatus(client.fiscalClosing), sintegra: fiscalStatus(client.sintegra), dstda: fiscalStatus(client.dstda), livroEletronico: fiscalStatus(client.balance), efdReinf: fiscalStatus(client.efdReinf) };
+    const overrides = store[state.selectedMonth]?.[client.cnpj]?.fields || {};
+    const values = { ...defaults, ...overrides };
+    const obligationFields = Object.keys(values);
+    const overall = obligationFields.every((field) => ['Concluído', 'Desobrigado', 'Não se aplica'].includes(values[field])) ? 'Em dia' : obligationFields.some((field) => ['Pendente', 'Em análise'].includes(values[field])) ? 'Atenção' : 'Aguardando';
+    return { ...client, ...values, overall };
+  });
+}
+function getFiscalSummary(rows) {
+  const fields = ['notas', 'apuracao', 'pgdas', 'guia', 'sintegra', 'dstda', 'livroEletronico', 'efdReinf'];
+  const completedObligations = rows.reduce((total, row) => total + fields.filter((field) => ['Concluído', 'Desobrigado', 'Não se aplica'].includes(row[field])).length, 0);
+  return { total: rows.length, done: rows.filter((row) => row.overall === 'Em dia').length, attention: rows.filter((row) => row.overall === 'Atenção').length, completedObligations, totalObligations: rows.length * fields.length };
+}
+function getFiscalHistory() { return loadFiscalStore()[state.selectedMonth]?.history || []; }
+function getFiscalDeadlines() { return [{ name: 'Apuração e fechamento fiscal', detail: 'Conferir bases e documentos do período', due: 'Hoje' }, { name: 'Transmissões e declarações', detail: 'PGDAS, Sintegra e DSTDA', due: 'Em 5 dias' }, { name: 'Guias e comprovantes', detail: 'Enviar ao cliente e registrar confirmação', due: 'Em 7 dias' }, { name: 'Livro eletrônico e EFD Reinf', detail: 'Revisar recibos e retornos', due: 'Em 10 dias' }]; }
+function getFiscalFilteredRows(rows) { const filters = state.fiscalFilters || { search: '', status: '', tax: '', city: '', obligation: '' }; const fields = ['notas', 'apuracao', 'pgdas', 'guia', 'sintegra', 'dstda', 'livroEletronico', 'efdReinf']; return rows.filter((row) => { const search = String(filters.search || '').toLowerCase(); const matchesStatus = !filters.status || row.overall === filters.status || fields.some((field) => row[field] === filters.status); const matchesObligation = !filters.obligation || row[filters.obligation] === filters.status || !filters.status; return (!search || `${row.name} ${row.cnpj} ${row.city}`.toLowerCase().includes(search)) && matchesStatus && matchesObligation && (!filters.tax || row.tax === filters.tax) && (!filters.city || row.city === filters.city); }); }
+
 function getPageTemplate() {
   const selectedClient = getSelectedClient();
   const clientsSection = state.currentPage === 'overview' ? getClientsSection() : '';
@@ -105,6 +138,21 @@ function getPageTemplate() {
       selectedYear: getCompetenceYear(state.selectedMonth),
       months: [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b)),
       canDeleteSelectedMonth: !originalMonthKeys.has(state.selectedMonth)
+    });
+  }
+
+  if (state.currentPage === 'fiscal') {
+    const fiscalRows = getFiscalRows();
+    const filters = state.fiscalFilters || { search: '', status: '', tax: '', city: '', obligation: '' };
+    return renderFiscalDashboard({
+      clients: getVisibleClients(),
+      selectedClient,
+      selectedMonth: state.selectedMonth,
+      filteredRows: getFiscalFilteredRows(fiscalRows),
+      filters,
+      summary: getFiscalSummary(fiscalRows),
+      deadlines: getFiscalDeadlines(),
+      history: getFiscalHistory()
     });
   }
 
@@ -732,3 +780,23 @@ window.addEventListener('hashchange', () => {
   renderApp();
   window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
 });
+
+function bindFiscalControls() {
+  if (state.currentPage !== 'fiscal') return;
+  const store = loadFiscalStore();
+  const month = state.selectedMonth;
+  store[month] ||= { history: [] };
+  const recordChange = (clientCnpj, field, value) => {
+    store[month][clientCnpj] ||= { fields: {} };
+    store[month][clientCnpj].fields ||= {};
+    store[month][clientCnpj].fields[field] = value;
+    store[month].history ||= [];
+    const client = getVisibleClients().find((item) => item.cnpj === clientCnpj);
+    store[month].history.unshift({ text: `${client?.name || 'Cliente'}: ${field} alterado para ${value}.`, date: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date()) });
+    saveFiscalStore(store);
+  };
+  document.querySelector('#fiscal-search')?.addEventListener('input', (event) => { state.fiscalFilters.search = event.target.value; renderApp(); });
+  document.querySelectorAll('[data-fiscal-filter]').forEach((select) => select.addEventListener('change', (event) => { state.fiscalFilters[event.target.dataset.fiscalFilter] = event.target.value; renderApp(); }));
+  document.querySelector('[data-action="clear-fiscal-filters"]')?.addEventListener('click', () => { state.fiscalFilters = { search: '', status: '', tax: '', city: '', obligation: '' }; renderApp(); });
+  document.querySelectorAll('[data-fiscal-status]').forEach((select) => select.addEventListener('change', (event) => { recordChange(event.target.dataset.fiscalClient, event.target.dataset.fiscalStatus, event.target.value); renderApp(); showToast('Situação fiscal atualizada.'); }));
+}

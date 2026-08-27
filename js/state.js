@@ -13,7 +13,8 @@ window.CorreaState = {
     payroll: '',
     fiscalClosing: '',
     status: 'active'
-  }
+  },
+  fiscalFilters: { search: '', status: '', tax: '' }
 };
 
 function getPageFromHash() {
