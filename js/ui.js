@@ -1034,6 +1034,18 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
     pendingFiles.splice(0, pendingFiles.length, ...(fileInput.files ? [...fileInput.files] : []));
     if (pendingFilesRoot) pendingFilesRoot.innerHTML = pendingFiles.map((file) => `<span>${file.name} · ${formatFileSize(file.size)}</span>`).join('');
   });
+  document.querySelectorAll('[data-fiscal-attachment-index]').forEach((attachmentButton) => {
+    attachmentButton.addEventListener('click', () => {
+      const attachment = detail.attachments?.[Number(attachmentButton.dataset.fiscalAttachmentIndex)];
+      const attachmentUrl = attachment?.dataUrl || attachment?.url;
+      if (!attachmentUrl) {
+        showToast('Este anexo não possui conteúdo para visualização.');
+        return;
+      }
+      const openedWindow = window.open(attachmentUrl, '_blank', 'noopener,noreferrer');
+      if (!openedWindow) showToast('O navegador bloqueou a abertura do anexo. Permita pop-ups para este site.');
+    });
+  });
   document.querySelector('#close-fiscal-routine')?.addEventListener('click', closeRoutine);
   document.querySelector('#cancel-fiscal-routine')?.addEventListener('click', closeRoutine);
   document.querySelector('#fiscal-routine-backdrop')?.addEventListener('click', (event) => { if (event.target.id === 'fiscal-routine-backdrop') closeRoutine(); });

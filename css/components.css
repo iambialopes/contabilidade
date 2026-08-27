@@ -1100,7 +1100,10 @@
 .fiscal-routine-pending-files { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 .fiscal-routine-pending-files span { padding:5px 8px; border-radius:6px; background:#F6F3EC; color:#737D70; font-size:10px; }
 .fiscal-routine-attachments { display:flex; flex-direction:column; gap:7px; margin-top:9px; }
-.fiscal-routine-attachment { display:flex; align-items:center; gap:8px; padding:9px 10px; border:1px solid #E6E2D9; border-radius:8px; background:#FBFAF6; color:#677263; }
+.fiscal-routine-attachment { display:flex; width:100%; align-items:center; gap:8px; padding:9px 10px; border:1px solid #E6E2D9; border-radius:8px; background:#FBFAF6; color:#677263; cursor:pointer; font:inherit; text-align:left; transition:background .18s ease, border-color .18s ease, transform .18s ease; }
+.fiscal-routine-attachment:hover { border-color:#D4A092; background:#FFF7F3; }
+.fiscal-routine-attachment:focus-visible { outline:2px solid #B87568; outline-offset:2px; }
+.fiscal-routine-attachment:active { transform:scale(.99); }
 .fiscal-routine-attachment > span { color:#A16D62; }
 .fiscal-routine-attachment strong { flex:1; min-width:0; overflow:hidden; font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
 .fiscal-routine-attachment small { color:#92998E; font-size:10px; }
