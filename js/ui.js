@@ -9,6 +9,7 @@ state.fiscalSelectedClientCnpj ||= localStorage.getItem(fiscalFocusStorageKey) |
 state.fiscalSelectedMonth = localStorage.getItem(fiscalCompetenceStorageKey) || state.fiscalSelectedMonth || state.selectedMonth;
 let competenceDraft = null;
 let competenceTargetMonth = '';
+let fiscalClientPickerOutsideHandler = null;
 const pageContent = document.querySelector('#page-content');
 const navigation = document.querySelector('#department-nav');
 const pageTitle = document.querySelector('#page-title');
@@ -829,7 +830,40 @@ function bindFiscalControls() {
     resetFiscalFilters();
     renderApp();
   });
-  document.querySelector('#fiscal-focus-client')?.addEventListener('change', (event) => { state.fiscalSelectedClientCnpj = event.target.value; localStorage.setItem(fiscalFocusStorageKey, state.fiscalSelectedClientCnpj); renderApp(); });
+  if (fiscalClientPickerOutsideHandler) {
+    document.removeEventListener('click', fiscalClientPickerOutsideHandler);
+    fiscalClientPickerOutsideHandler = null;
+  }
+  const clientPicker = document.querySelector('[data-fiscal-client-picker]');
+  const clientPickerTrigger = document.querySelector('#fiscal-focus-client-trigger');
+  const clientPickerMenu = document.querySelector('#fiscal-focus-client-options');
+  const clientPickerSearch = document.querySelector('#fiscal-focus-client-search');
+  const clientPickerOptions = [...document.querySelectorAll('[data-fiscal-focus-client]')];
+  const closeClientPicker = () => {
+    clientPicker?.classList.remove('is-open');
+    clientPickerTrigger?.setAttribute('aria-expanded', 'false');
+  };
+  clientPickerTrigger?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isOpen = clientPicker?.classList.toggle('is-open');
+    clientPickerTrigger.setAttribute('aria-expanded', String(Boolean(isOpen)));
+    if (isOpen) window.setTimeout(() => clientPickerSearch?.focus(), 0);
+    else clientPickerSearch?.blur();
+  });
+  clientPickerSearch?.addEventListener('input', (event) => {
+    const search = event.target.value.toLowerCase().trim();
+    clientPickerOptions.forEach((option) => { option.hidden = !option.dataset.fiscalClientName.includes(search); });
+  });
+  clientPickerOptions.forEach((option) => option.addEventListener('click', () => {
+    state.fiscalSelectedClientCnpj = option.dataset.fiscalFocusClient;
+    localStorage.setItem(fiscalFocusStorageKey, state.fiscalSelectedClientCnpj);
+    renderApp();
+  }));
+  fiscalClientPickerOutsideHandler = (event) => {
+    if (clientPicker && !clientPicker.contains(event.target)) closeClientPicker();
+  };
+  document.addEventListener('click', fiscalClientPickerOutsideHandler);
+  clientPickerMenu?.addEventListener('click', (event) => event.stopPropagation());
   document.querySelector('#fiscal-search')?.addEventListener('input', (event) => { state.fiscalFilters.search = event.target.value; renderApp(); });
   document.querySelectorAll('[data-fiscal-filter]').forEach((select) => select.addEventListener('change', (event) => { state.fiscalFilters[event.target.dataset.fiscalFilter] = event.target.value; renderApp(); }));
   document.querySelector('[data-action="clear-fiscal-filters"]')?.addEventListener('click', () => { state.fiscalFilters = { search: '', status: '', tax: '', city: '', obligation: '' }; renderApp(); });
