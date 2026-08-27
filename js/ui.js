@@ -242,14 +242,14 @@ function loadRoutineProgress() {
 
 const fiscalRoutineDetailsStorageKey = 'correa-controle-interno-fiscal-routine-details';
 const fiscalRoutineDefinitions = {
-  notas: { title: 'Importação das notas', description: 'Receber XML, validar o período e organizar os documentos fiscais.', due: 'Hoje', responsible: 'Fiscal', checklist: [{ text: 'Documentos recebidos', done: false }, { text: 'Período conferido', done: false }, { text: 'Arquivos organizados', done: false }] },
-  apuracao: { title: 'Apuração na Domínio', description: 'Conferir impostos, bases de cálculo e documentos antes da transmissão.', due: '20 AGO', responsible: 'Fiscal', checklist: [{ text: 'Movimento conferido', done: false }, { text: 'Impostos apurados', done: false }, { text: 'Memória de cálculo revisada', done: false }] },
-  pgdas: { title: 'Transmissão PGDAS', description: 'Transmitir a declaração e salvar o protocolo do cliente.', due: '21 AGO', responsible: 'Fiscal', checklist: [{ text: 'Faturamento conferido', done: false }, { text: 'PGDAS transmitido', done: false }, { text: 'Protocolo arquivado', done: false }] },
-  guia: { title: 'Envio da guia', description: 'Enviar a guia pelo canal combinado e registrar a confirmação do cliente.', due: '22 AGO', responsible: 'Fiscal', checklist: [{ text: 'Guia gerada', done: false }, { text: 'Guia enviada', done: false }, { text: 'Confirmação registrada', done: false }] },
-  sintegra: { title: 'Sintegra', description: 'Validar a obrigação estadual conforme a atividade e o enquadramento da empresa.', due: '25 AGO', responsible: 'Fiscal', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Arquivo conferido', done: false }, { text: 'Recibo arquivado', done: false }] },
-  dstda: { title: 'DSTDA', description: 'Verificar a obrigatoriedade, preparar a declaração e registrar o envio.', due: '25 AGO', responsible: 'Fiscal', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Dados conferidos', done: false }, { text: 'Comprovante arquivado', done: false }] },
-  livroEletronico: { title: 'Livro eletrônico', description: 'Revisar os arquivos do período, recibos e eventuais pendências de retorno.', due: '27 AGO', responsible: 'Fiscal', checklist: [{ text: 'Movimento importado', done: false }, { text: 'Livro revisado', done: false }, { text: 'Recibo arquivado', done: false }] },
-  efdReinf: { title: 'EFD Reinf', description: 'Conferir os eventos, transmitir quando aplicável e acompanhar o retorno.', due: '27 AGO', responsible: 'Fiscal', checklist: [{ text: 'Eventos verificados', done: false }, { text: 'Transmissão realizada', done: false }, { text: 'Retorno conferido', done: false }] }
+  notas: { title: 'Importação das notas', description: 'Receber XML, validar o período e organizar os documentos fiscais.', due: 'Hoje', responsible: '', checklist: [{ text: 'Documentos recebidos', done: false }, { text: 'Período conferido', done: false }, { text: 'Arquivos organizados', done: false }] },
+  apuracao: { title: 'Apuração na Domínio', description: 'Conferir impostos, bases de cálculo e documentos antes da transmissão.', due: '20 AGO', responsible: '', checklist: [{ text: 'Movimento conferido', done: false }, { text: 'Impostos apurados', done: false }, { text: 'Memória de cálculo revisada', done: false }] },
+  pgdas: { title: 'Transmissão PGDAS', description: 'Transmitir a declaração e salvar o protocolo do cliente.', due: '21 AGO', responsible: '', checklist: [{ text: 'Faturamento conferido', done: false }, { text: 'PGDAS transmitido', done: false }, { text: 'Protocolo arquivado', done: false }] },
+  guia: { title: 'Envio da guia', description: 'Enviar a guia pelo canal combinado e registrar a confirmação do cliente.', due: '22 AGO', responsible: '', checklist: [{ text: 'Guia gerada', done: false }, { text: 'Guia enviada', done: false }, { text: 'Confirmação registrada', done: false }] },
+  sintegra: { title: 'Sintegra', description: 'Validar a obrigação estadual conforme a atividade e o enquadramento da empresa.', due: '25 AGO', responsible: '', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Arquivo conferido', done: false }, { text: 'Recibo arquivado', done: false }] },
+  dstda: { title: 'DSTDA', description: 'Verificar a obrigatoriedade, preparar a declaração e registrar o envio.', due: '25 AGO', responsible: '', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Dados conferidos', done: false }, { text: 'Comprovante arquivado', done: false }] },
+  livroEletronico: { title: 'Livro eletrônico', description: 'Revisar os arquivos do período, recibos e eventuais pendências de retorno.', due: '27 AGO', responsible: '', checklist: [{ text: 'Movimento importado', done: false }, { text: 'Livro revisado', done: false }, { text: 'Recibo arquivado', done: false }] },
+  efdReinf: { title: 'EFD Reinf', description: 'Conferir os eventos, transmitir quando aplicável e acompanhar o retorno.', due: '27 AGO', responsible: '', checklist: [{ text: 'Eventos verificados', done: false }, { text: 'Transmissão realizada', done: false }, { text: 'Retorno conferido', done: false }] }
 };
 const fiscalRoutineLabels = Object.fromEntries(Object.entries(fiscalRoutineDefinitions).map(([key, detail]) => [key, detail.title]));
 function loadFiscalRoutineDetailsStore() {
@@ -261,9 +261,11 @@ function loadFiscalRoutineDetailsStore() {
 function saveFiscalRoutineDetailsStore(store) { localStorage.setItem(fiscalRoutineDetailsStorageKey, JSON.stringify(store)); }
 function cloneChecklist(items) { return (items || []).map((item) => ({ text: item.text, done: Boolean(item.done) })); }
 function getFiscalRoutineDetail(month, clientCnpj, routineKey, status = 'Aguardando') {
-  const fallback = fiscalRoutineDefinitions[routineKey] || { title: 'Nova rotina fiscal', description: '', due: 'Sem prazo', responsible: 'Fiscal', checklist: [] };
+  const fallback = fiscalRoutineDefinitions[routineKey] || { title: 'Nova rotina fiscal', description: '', due: 'Sem prazo', responsible: '', checklist: [] };
   const saved = loadFiscalRoutineDetailsStore()[month]?.[clientCnpj]?.[routineKey] || {};
-  return { ...fallback, ...saved, status: fiscalRoutineDefinitions[routineKey] ? status : (saved.status || status), checklist: Array.isArray(saved.checklist) ? cloneChecklist(saved.checklist) : cloneChecklist(fallback.checklist), attachments: Array.isArray(saved.attachments) ? saved.attachments : [] };
+  const merged = { ...fallback, ...saved };
+  const responsible = ['Ana Cristina', 'Adriele'].includes(merged.responsible) ? merged.responsible : '';
+  return { ...merged, responsible, status: fiscalRoutineDefinitions[routineKey] ? status : (saved.status || status), checklist: Array.isArray(saved.checklist) ? cloneChecklist(saved.checklist) : cloneChecklist(fallback.checklist), attachments: Array.isArray(saved.attachments) ? saved.attachments : [] };
 }
 function getFiscalRoutineItems(month, clientCnpj) {
   const custom = loadFiscalRoutineDetailsStore()[month]?.[clientCnpj] || {};
@@ -1016,7 +1018,7 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
   const row = getFiscalRows().find((item) => item.cnpj === client?.cnpj);
   const actualKey = isNew ? `custom-${Date.now()}` : routineKey;
   const detail = isNew
-    ? { title: '', description: '', due: 'Sem prazo', responsible: 'Fiscal', status: 'Aguardando', checklist: [{ text: 'Documentos necessários recebidos', done: false }, { text: 'Conferência realizada', done: false }, { text: 'Comprovante arquivado', done: false }], attachments: [], notes: '' }
+    ? { title: '', description: '', due: 'Sem prazo', responsible: '', status: 'Aguardando', checklist: [{ text: 'Documentos necessários recebidos', done: false }, { text: 'Conferência realizada', done: false }, { text: 'Comprovante arquivado', done: false }], attachments: [], notes: '' }
     : getFiscalRoutineDetail(month, client?.cnpj || '', routineKey, row?.[routineKey] || 'Aguardando');
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
   modalRoot.innerHTML = renderFiscalRoutineModal({ client, month, routineKey: actualKey, detail, statusOptions, isNew });
@@ -1047,7 +1049,9 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
     try {
       const newAttachments = await Promise.all(pendingFiles.map(async (file) => ({ name: file.name, type: file.type, size: file.size, sizeLabel: formatFileSize(file.size), dataUrl: await readFileAsDataUrl(file) })));
       const dueDate = document.querySelector('#fiscal-routine-due-date')?.value || '';
-      const updated = { ...detail, title, status: document.querySelector('#fiscal-routine-status')?.value || 'Aguardando', dueDate, due: dueDate ? formatFiscalDate(dueDate) : 'Sem data', responsible: document.querySelector('#fiscal-routine-responsible')?.value.trim() || 'Fiscal', description: document.querySelector('#fiscal-routine-description')?.value.trim() || '', notes: document.querySelector('#fiscal-routine-notes')?.value.trim() || '', checklist, attachments: [...(detail.attachments || []), ...newAttachments], updatedAt: new Date().toISOString() };
+      const responsible = document.querySelector('#fiscal-routine-responsible')?.value || '';
+      if (!['Ana Cristina', 'Adriele'].includes(responsible)) { error.textContent = 'Selecione Ana Cristina ou Adriele como responsável.'; return; }
+      const updated = { ...detail, title, status: document.querySelector('#fiscal-routine-status')?.value || 'Aguardando', dueDate, due: dueDate ? formatFiscalDate(dueDate) : 'Sem data', responsible, description: document.querySelector('#fiscal-routine-description')?.value.trim() || '', notes: document.querySelector('#fiscal-routine-notes')?.value.trim() || '', checklist, attachments: [...(detail.attachments || []), ...newAttachments], updatedAt: new Date().toISOString() };
       const store = loadFiscalRoutineDetailsStore();
       store[month] ||= {};
       store[month][client.cnpj] ||= {};

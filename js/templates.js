@@ -333,6 +333,7 @@ function renderLowerPanels(selectedClient) {
 
 function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history, routineItems = [], routineDetails = {}, routineAlerts = [] }) {
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
+  const fiscalResponsibleOptions = ['Ana Cristina', 'Adriele'];
   const statusClass = (value) => String(value || '').toLowerCase().replaceAll(' ', '-').replaceAll('ã', 'a').replaceAll('á', 'a');
   const selectStatus = (row, field) => `<select class="fiscal-status-select fiscal-status-${statusClass(row[field])}" data-fiscal-status="${field}" data-fiscal-client="${row.cnpj}" aria-label="${field} de ${row.name}">${statusOptions.map((option) => `<option ${row[field] === option ? 'selected' : ''}>${option}</option>`).join('')}</select>`;
   const focusRow = fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0];
@@ -419,6 +420,7 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months,
 }
 
 function renderFiscalRoutineModal({ client, month, routineKey, detail, statusOptions, isNew = false }) {
+  const fiscalResponsibleOptions = ['Ana Cristina', 'Adriele'];
   const checklist = Array.isArray(detail.checklist) && detail.checklist.length ? detail.checklist : [
     { text: 'Documentos do período recebidos', done: false },
     { text: 'Conferência realizada', done: false },
@@ -440,7 +442,7 @@ function renderFiscalRoutineModal({ client, month, routineKey, detail, statusOpt
           <label class="form-field wide"><span>Nome da rotina</span><input id="fiscal-routine-title" value="${escapeHtml(detail.title || '')}" placeholder="Ex.: Transmissão PGDAS"></label>
           <label class="form-field"><span>Status</span><select id="fiscal-routine-status">${statusOptions.map((option) => `<option ${detail.status === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label>
           <label class="form-field"><span>Próximo prazo</span><input id="fiscal-routine-due-date" type="date" value="${escapeHtml(detail.dueDate || '')}"><small class="field-hint">Escolha o dia exato para ativar os alertas.</small></label>
-          <label class="form-field"><span>Responsável</span><input id="fiscal-routine-responsible" value="${escapeHtml(detail.responsible || '')}" placeholder="Ex.: Bianca / Fiscal"></label>
+          <label class="form-field"><span>Responsável</span><select id="fiscal-routine-responsible"><option value="">Selecione</option>${fiscalResponsibleOptions.map((option) => `<option value="${option}" ${detail.responsible === option ? 'selected' : ''}>${option}</option>`).join('')}</select><small class="field-hint">A rotina Fiscal pertence a uma destas responsáveis.</small></label>
           <label class="form-field wide"><span>O que precisa ser feito</span><textarea id="fiscal-routine-description" rows="3" placeholder="Descreva o procedimento, documentos e canal de envio.">${escapeHtml(detail.description || '')}</textarea></label>
         </div>
         <div class="fiscal-routine-detail-section">
