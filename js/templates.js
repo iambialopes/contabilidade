@@ -347,7 +347,7 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months,
     </section>
     <section class="fiscal-focus-panel panel">
       <div class="section-heading fiscal-focus-heading"><div><p class="eyebrow">Acompanhamento do cliente</p><h3>${focusRow?.name || 'Nenhum cliente selecionado'}</h3><small>${focusRow?.cnpj || ''} · ${focusRow?.city || ''} · ${focusRow?.tax || ''}</small></div><span class="fiscal-overall fiscal-overall-${statusClass(focusRow?.overall)}">${focusRow?.overall || 'Aguardando'}</span></div>
-      <div class="fiscal-focus-grid">${focusItems.map(([key, label]) => `<div class="fiscal-focus-item"><span>${label}</span><strong class="fiscal-focus-status-${statusClass(focusRow?.[key])}">${focusRow?.[key] || 'Aguardando'}</strong></div>`).join('')}</div>
+      <div class="fiscal-focus-grid">${focusItems.map(([key, label]) => `<div class="fiscal-focus-item fiscal-focus-item-${statusClass(focusRow?.[key])}"><span>${label}</span><strong class="fiscal-focus-status-${statusClass(focusRow?.[key])}">${focusRow?.[key] || 'Aguardando'}</strong></div>`).join('')}</div>
     </section>
     </section>
     <section class="fiscal-zone fiscal-overview-zone" aria-labelledby="fiscal-overview-zone-title">
