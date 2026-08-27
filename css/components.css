@@ -1113,3 +1113,27 @@
   .fiscal-routine-modal .modal-actions { flex-direction:column-reverse; align-items:stretch; }
   .fiscal-routine-modal .modal-actions button { width:100%; margin:0; }
 }
+
+/* Prazos reais e alertas do acompanhamento Fiscal */
+.fiscal-routine-alerts { display:flex; flex-direction:column; gap:8px; margin:0 0 14px; }
+.fiscal-routine-alert { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #E5E1D8; border-left:3px solid #D4A092; border-radius:9px; background:#FFF9F6; color:#6D756B; }
+.fiscal-routine-alert > span { display:grid; place-items:center; width:24px; height:24px; border-radius:7px; background:#F8E9E4; color:#A85F52; font-size:12px; font-weight:900; }
+.fiscal-routine-alert div { display:flex; min-width:0; flex-direction:column; gap:2px; }
+.fiscal-routine-alert strong { color:#586354; font-size:11px; font-weight:850; }
+.fiscal-routine-alert small { color:#8B9387; font-size:10px; }
+.fiscal-routine-alert-hoje { border-left-color:#B87568; background:#FFF3EF; }
+.fiscal-routine-alert-vencido { border-left-color:#A85F52; background:#FBEDEA; }
+.fiscal-routine-alert-vencido > span { background:#E9C9C0; color:#984E43; }
+.fiscal-routine-alert-proximo { border-left-color:#C8A56A; background:#FFF9EC; }
+.fiscal-routine-alert-proximo > span { background:#F4E8C9; color:#927A52; }
+.fiscal-routine-alerts.is-empty { flex-direction:row; align-items:center; border:1px dashed #E3E0D6; border-radius:9px; background:#FBFAF6; color:#858D81; }
+.fiscal-routine-alerts.is-empty > span { color:#889381; font-size:18px; }
+.fiscal-routine-alerts.is-empty strong { color:#66705F; }
+.fiscal-routine-alerts.is-empty small { color:#969D93; }
+.routine-card .due,
+.fiscal-due-sem-data { color:#969D93; }
+.fiscal-due-vencido { color:#A85F52 !important; font-weight:900 !important; }
+.fiscal-due-hoje { color:#B87568 !important; font-weight:900 !important; }
+.fiscal-due-proximo { color:#A17B3F !important; font-weight:900 !important; }
+.fiscal-due-futuro { color:#71816A !important; }
+.field-hint { color:#9A9F95; font-size:10px; line-height:1.35; }

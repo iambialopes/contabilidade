@@ -140,7 +140,12 @@ function getFiscalSummary(rows) {
   return { total: rows.length, done: rows.filter((row) => row.overall === 'Em dia').length, attention: rows.filter((row) => row.overall === 'Atenção').length, completedObligations, totalObligations: rows.length * fields.length };
 }
 function getFiscalHistory() { return loadFiscalStore()[getFiscalMonth()]?.history || []; }
-function getFiscalDeadlines() { return [{ name: 'Apuração e fechamento fiscal', detail: 'Conferir bases e documentos do período', due: 'Hoje' }, { name: 'Transmissões e declarações', detail: 'PGDAS, Sintegra e DSTDA', due: 'Em 5 dias' }, { name: 'Guias e comprovantes', detail: 'Enviar ao cliente e registrar confirmação', due: 'Em 7 dias' }, { name: 'Livro eletrônico e EFD Reinf', detail: 'Revisar recibos e retornos', due: 'Em 10 dias' }]; }
+function getFiscalDeadlines(month = getFiscalMonth(), clientCnpj = '', row) {
+  const details = getFiscalRoutineDetailsForClient(month, clientCnpj, row);
+  const scheduled = Object.values(details).filter((detail) => detail.dueDate).sort((first, second) => first.dueState.days - second.dueState.days);
+  if (scheduled.length) return scheduled.slice(0, 4).map((detail) => ({ name: detail.title, detail: detail.description || 'Acompanhar a rotina fiscal da competência', due: detail.dueState.key === 'vencido' ? `Vencido · ${detail.displayDue}` : detail.dueState.key === 'hoje' ? 'Hoje' : `Em ${detail.dueState.days} dias · ${detail.displayDue}` }));
+  return [{ name: 'Defina o próximo prazo da rotina', detail: 'Abra cada rotina para escolher o dia exato e ativar os alertas', due: 'Sem data' }];
+}
 function getFiscalFilteredRows(rows) { const filters = state.fiscalFilters || { search: '', status: '', tax: '', city: '', obligation: '' }; const fields = ['notas', 'apuracao', 'pgdas', 'guia', 'sintegra', 'dstda', 'livroEletronico', 'efdReinf']; return rows.filter((row) => { const search = String(filters.search || '').toLowerCase(); const matchesStatus = !filters.status || row.overall === filters.status || fields.some((field) => row[field] === filters.status); const matchesObligation = !filters.obligation || row[filters.obligation] === filters.status || !filters.status; return (!search || `${row.name} ${row.cnpj} ${row.city}`.toLowerCase().includes(search)) && matchesStatus && matchesObligation && (!filters.tax || row.tax === filters.tax) && (!filters.city || row.city === filters.city); }); }
 
 function getPageTemplate() {
@@ -174,10 +179,11 @@ function getPageTemplate() {
       filteredRows: getFiscalFilteredRows(fiscalRows),
       filters,
       summary: getFiscalSummary(fiscalRows),
-      deadlines: getFiscalDeadlines(),
+      deadlines: getFiscalDeadlines(fiscalMonth, selectedClient?.cnpj || '', fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0]),
       history: getFiscalHistory(),
       routineItems: getFiscalRoutineItems(fiscalMonth, selectedClient?.cnpj || ''),
-      routineDetails: getFiscalRoutineDetailsForClient(fiscalMonth, selectedClient?.cnpj || '', fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0])
+      routineDetails: getFiscalRoutineDetailsForClient(fiscalMonth, selectedClient?.cnpj || '', fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0]),
+      routineAlerts: getFiscalRoutineAlerts(fiscalMonth, selectedClient?.cnpj || '', fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0])
     });
   }
 
@@ -265,8 +271,41 @@ function getFiscalRoutineItems(month, clientCnpj) {
   const customItems = Object.entries(custom).filter(([key]) => !fiscalRoutineDefinitions[key]).map(([key, detail]) => [key, detail.title || 'Nova rotina fiscal']);
   return [...base, ...customItems];
 }
+function parseFiscalDate(value) {
+  if (!value) return null;
+  const [year, month, day] = String(value).split('-').map(Number);
+  if (!year || !month || !day) return null;
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+function formatFiscalDate(value) {
+  const date = parseFiscalDate(value);
+  if (!date) return 'Sem data';
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date).replace('.', '');
+}
+function getFiscalDueState(value, today = new Date()) {
+  const dueDate = parseFiscalDate(value);
+  if (!dueDate) return { key: 'sem-data', label: 'Data pendente', icon: '◷', days: null };
+  const reference = new Date(today);
+  reference.setHours(0, 0, 0, 0);
+  const days = Math.round((dueDate - reference) / 86400000);
+  if (days < 0) return { key: 'vencido', label: 'Vencido', icon: '!', days };
+  if (days === 0) return { key: 'hoje', label: 'Vence hoje', icon: '!', days };
+  if (days <= 7) return { key: 'proximo', label: 'Próximo do vencimento', icon: '◷', days };
+  return { key: 'futuro', label: 'Programado', icon: '◷', days };
+}
+function getFiscalRoutineDetailWithDue(month, clientCnpj, routineKey, status = 'Aguardando') {
+  const detail = getFiscalRoutineDetail(month, clientCnpj, routineKey, status);
+  const dueState = getFiscalDueState(detail.dueDate);
+  return { ...detail, dueState, displayDue: detail.dueDate ? formatFiscalDate(detail.dueDate) : 'Sem data' };
+}
 function getFiscalRoutineDetailsForClient(month, clientCnpj, row) {
-  return Object.fromEntries(getFiscalRoutineItems(month, clientCnpj).map(([key]) => [key, getFiscalRoutineDetail(month, clientCnpj, key, row?.[key] || 'Aguardando')]));
+  return Object.fromEntries(getFiscalRoutineItems(month, clientCnpj).map(([key]) => [key, getFiscalRoutineDetailWithDue(month, clientCnpj, key, row?.[key] || 'Aguardando')]));
+}
+function getFiscalRoutineAlerts(month, clientCnpj, row) {
+  const details = getFiscalRoutineDetailsForClient(month, clientCnpj, row);
+  return Object.entries(details).map(([key, detail]) => ({ key, ...detail })).filter((detail) => detail.dueDate && ['vencido', 'hoje', 'proximo'].includes(detail.dueState.key) && !['Concluído', 'Desobrigado', 'Não se aplica'].includes(detail.status)).sort((first, second) => first.dueState.days - second.dueState.days);
 }
 function recordFiscalRoutineStatus(month, clientCnpj, routineKey, status) {
   if (!fiscalRoutineDefinitions[routineKey]) return;
@@ -1007,7 +1046,8 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
     const checklist = [...document.querySelectorAll('[data-fiscal-check]')].map((input) => ({ text: input.dataset.fiscalCheckText || input.nextElementSibling?.textContent || '', done: input.checked }));
     try {
       const newAttachments = await Promise.all(pendingFiles.map(async (file) => ({ name: file.name, type: file.type, size: file.size, sizeLabel: formatFileSize(file.size), dataUrl: await readFileAsDataUrl(file) })));
-      const updated = { ...detail, title, status: document.querySelector('#fiscal-routine-status')?.value || 'Aguardando', due: document.querySelector('#fiscal-routine-due')?.value.trim() || 'Sem prazo', responsible: document.querySelector('#fiscal-routine-responsible')?.value.trim() || 'Fiscal', description: document.querySelector('#fiscal-routine-description')?.value.trim() || '', notes: document.querySelector('#fiscal-routine-notes')?.value.trim() || '', checklist, attachments: [...(detail.attachments || []), ...newAttachments], updatedAt: new Date().toISOString() };
+      const dueDate = document.querySelector('#fiscal-routine-due-date')?.value || '';
+      const updated = { ...detail, title, status: document.querySelector('#fiscal-routine-status')?.value || 'Aguardando', dueDate, due: dueDate ? formatFiscalDate(dueDate) : 'Sem data', responsible: document.querySelector('#fiscal-routine-responsible')?.value.trim() || 'Fiscal', description: document.querySelector('#fiscal-routine-description')?.value.trim() || '', notes: document.querySelector('#fiscal-routine-notes')?.value.trim() || '', checklist, attachments: [...(detail.attachments || []), ...newAttachments], updatedAt: new Date().toISOString() };
       const store = loadFiscalRoutineDetailsStore();
       store[month] ||= {};
       store[month][client.cnpj] ||= {};

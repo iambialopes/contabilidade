@@ -331,7 +331,7 @@ function renderLowerPanels(selectedClient) {
   `;
 }
 
-function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history, routineItems = [], routineDetails = {} }) {
+function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history, routineItems = [], routineDetails = {}, routineAlerts = [] }) {
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
   const statusClass = (value) => String(value || '').toLowerCase().replaceAll(' ', '-').replaceAll('ã', 'a').replaceAll('á', 'a');
   const selectStatus = (row, field) => `<select class="fiscal-status-select fiscal-status-${statusClass(row[field])}" data-fiscal-status="${field}" data-fiscal-client="${row.cnpj}" aria-label="${field} de ${row.name}">${statusOptions.map((option) => `<option ${row[field] === option ? 'selected' : ''}>${option}</option>`).join('')}</select>`;
@@ -357,19 +357,21 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months,
           </div>
           <button class="primary-button" data-action="new-fiscal-routine" data-client="${selectedClient?.cnpj}">＋ Nova rotina</button>
         </div>
+        ${routineAlerts?.length ? `<div class="fiscal-routine-alerts">${routineAlerts.map((alert) => `<div class="fiscal-routine-alert fiscal-routine-alert-${alert.dueState.key}"><span>${alert.dueState.icon}</span><div><strong>${alert.dueState.label}: ${alert.title}</strong><small>${alert.displayDue}${alert.dueState.key === 'vencido' ? ' · regularize ou registre a conclusão' : ' · acompanhe esta rotina'}</small></div></div>`).join('')}</div>` : '<div class="fiscal-routine-alerts is-empty"><span>◷</span><div><strong>Defina datas exatas para acompanhar os prazos.</strong><small>As rotinas com data cadastrada aparecerão aqui quando estiverem próximas ou vencidas.</small></div></div>'}
         <div class="fiscal-routine-grid">
           ${(routineItems.length ? routineItems : focusItems).map(([key, label]) => {
             const detail = routineDetails[key] || {};
             const status = detail.status || focusRow?.[key] || 'Aguardando';
             const title = detail.title || label;
             const description = detail.description || `Acompanhamento da obrigação ${label.toLowerCase()} para este período.`;
-            const due = detail.due || 'Sem prazo';
+            const due = detail.displayDue || detail.due || 'Sem data';
+            const dueState = detail.dueState || { key: 'sem-data', label: 'Data pendente' };
             const tone = statusClass(status) === 'concluido' ? 'olive' : statusClass(status) === 'aguardando' ? 'sand' : statusClass(status) === 'pendente' ? 'peach' : statusClass(status) === 'em-analise' ? 'peach' : 'blue';
             return `
               <button class="routine-card" data-action="open-fiscal-routine" data-routine="${key}" data-client="${selectedClient?.cnpj}">
                 <div class="routine-top">
                   <span class="routine-status ${tone}">${status}</span>
-                  <span class="due">${due}</span>
+                  <span class="due fiscal-due-${dueState.key}" title="${dueState.label}">${due}</span>
                 </div>
                 <h4>${title}</h4>
                 <p>${description}</p>
@@ -437,7 +439,7 @@ function renderFiscalRoutineModal({ client, month, routineKey, detail, statusOpt
         <div class="fiscal-routine-form-grid">
           <label class="form-field wide"><span>Nome da rotina</span><input id="fiscal-routine-title" value="${escapeHtml(detail.title || '')}" placeholder="Ex.: Transmissão PGDAS"></label>
           <label class="form-field"><span>Status</span><select id="fiscal-routine-status">${statusOptions.map((option) => `<option ${detail.status === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label>
-          <label class="form-field"><span>Próximo prazo</span><input id="fiscal-routine-due" value="${escapeHtml(detail.due || '')}" placeholder="Ex.: 20 AGO"></label>
+          <label class="form-field"><span>Próximo prazo</span><input id="fiscal-routine-due-date" type="date" value="${escapeHtml(detail.dueDate || '')}"><small class="field-hint">Escolha o dia exato para ativar os alertas.</small></label>
           <label class="form-field"><span>Responsável</span><input id="fiscal-routine-responsible" value="${escapeHtml(detail.responsible || '')}" placeholder="Ex.: Bianca / Fiscal"></label>
           <label class="form-field wide"><span>O que precisa ser feito</span><textarea id="fiscal-routine-description" rows="3" placeholder="Descreva o procedimento, documentos e canal de envio.">${escapeHtml(detail.description || '')}</textarea></label>
         </div>
