@@ -1046,6 +1046,30 @@ function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
       if (!openedWindow) showToast('O navegador bloqueou a abertura do anexo. Permita pop-ups para este site.');
     });
   });
+  document.querySelectorAll('[data-fiscal-attachment-delete-index]').forEach((deleteButton) => {
+    deleteButton.addEventListener('click', () => {
+      const index = Number(deleteButton.dataset.fiscalAttachmentDeleteIndex);
+      const attachment = detail.attachments?.[index];
+      if (!attachment || !window.confirm(`Excluir o arquivo "${attachment.name}"?`)) return;
+      detail.attachments.splice(index, 1);
+      deleteButton.closest('.fiscal-routine-attachment')?.remove();
+      const attachmentsRoot = document.querySelector('.fiscal-routine-attachments');
+      if (!attachmentsRoot) return;
+      if (!detail.attachments.length) {
+        attachmentsRoot.innerHTML = '<p class="fiscal-empty-copy">Nenhum arquivo anexado a esta rotina.</p>';
+      } else {
+        attachmentsRoot.querySelectorAll('[data-fiscal-attachment-index]').forEach((button, nextIndex) => {
+          button.dataset.fiscalAttachmentIndex = String(nextIndex);
+          button.setAttribute('aria-label', `Abrir anexo ${detail.attachments[nextIndex].name}`);
+        });
+        attachmentsRoot.querySelectorAll('[data-fiscal-attachment-delete-index]').forEach((button, nextIndex) => {
+          button.dataset.fiscalAttachmentDeleteIndex = String(nextIndex);
+          button.setAttribute('aria-label', `Excluir anexo ${detail.attachments[nextIndex].name}`);
+        });
+      }
+      showToast('Anexo removido. Clique em “Salvar rotina” para confirmar.');
+    });
+  });
   document.querySelector('#close-fiscal-routine')?.addEventListener('click', closeRoutine);
   document.querySelector('#cancel-fiscal-routine')?.addEventListener('click', closeRoutine);
   document.querySelector('#fiscal-routine-backdrop')?.addEventListener('click', (event) => { if (event.target.id === 'fiscal-routine-backdrop') closeRoutine(); });
