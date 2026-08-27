@@ -20,12 +20,14 @@ const customClientsStorageKey = 'correa-controle-interno-custom-clients';
 const deletedClientsStorageKey = 'correa-controle-interno-deleted-clients';
 const routineProgressStorageKey = 'correa-controle-interno-routine-progress';
 const customCompetenciesStorageKey = 'correa-controle-interno-custom-competencies';
+const clientCompetencesStorageKey = 'correa-controle-interno-client-competences';
 const savedCompetencies = loadSavedCompetencies();
 Object.entries(savedCompetencies).forEach(([month, snapshot]) => {
   monthHistory[month] = snapshot;
   if (!months.includes(month)) months.push(month);
 });
 const savedClients = loadSavedClients();
+const clientCompetences = loadClientCompetences();
 const deletedClientCnpjs = loadDeletedClientCnpjs();
 savedClients.forEach((savedClient) => {
   const existingClient = clients.find((client) => client.cnpj === savedClient.cnpj);
@@ -35,6 +37,10 @@ savedClients.forEach((savedClient) => {
 for (let index = clients.length - 1; index >= 0; index -= 1) {
   if (deletedClientCnpjs.includes(clients[index].cnpj)) clients.splice(index, 1);
 }
+savedClients.forEach((savedClient) => {
+  if (!Array.isArray(clientCompetences[savedClient.cnpj]) || !clientCompetences[savedClient.cnpj].length) clientCompetences[savedClient.cnpj] = [state.selectedMonth];
+});
+saveClientCompetences(clientCompetences);
 const menuToggle = document.querySelector('#menu-toggle');
 const menuClose = document.querySelector('#menu-close');
 const mobileOverlay = document.querySelector('#mobile-overlay');
@@ -56,10 +62,13 @@ function getFiscalMonth() {
 function getVisibleClients(month = state.selectedMonth) {
   const snapshots = monthHistory[month];
   if (!snapshots) return clients;
-  return snapshots.map((snapshot) => {
+  const snapshotCnpjs = new Set(snapshots.map((snapshot) => normalizeDocument(snapshot.cnpj)));
+  const snapshotClients = snapshots.map((snapshot) => {
     const current = clients.find((client) => normalizeDocument(client.cnpj) === normalizeDocument(snapshot.cnpj) || client.name.toLowerCase() === snapshot.name.toLowerCase());
     return { ...current, ...snapshot, tone: current?.tone || snapshot.tone, initials: current?.initials || snapshot.initials };
   });
+  const addedForMonth = clients.filter((client) => clientCompetences[client.cnpj]?.includes(month) && !snapshotCnpjs.has(normalizeDocument(client.cnpj)));
+  return [...snapshotClients, ...addedForMonth];
 }
 
 function getClientByCnpj(cnpj) {
@@ -673,6 +682,14 @@ function openDeleteConfirmation(client) {
   document.querySelector('#cancel-delete').focus();
 }
 
+function loadClientCompetences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(clientCompetencesStorageKey) || '{}');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+  } catch (error) { return {}; }
+}
+function saveClientCompetences(value) { localStorage.setItem(clientCompetencesStorageKey, JSON.stringify(value)); }
+
 function loadSavedClients() {
   try {
     const saved = JSON.parse(localStorage.getItem(customClientsStorageKey) || '[]');
@@ -692,6 +709,8 @@ function saveClientToStorage(client) {
 }
 
 function deleteClientFromStorage(client) {
+  delete clientCompetences[client.cnpj];
+  saveClientCompetences(clientCompetences);
   const saved = loadSavedClients().filter((savedClient) => savedClient.cnpj !== client.cnpj);
   if (saved.length) {
     localStorage.setItem(customClientsStorageKey, JSON.stringify(saved));
@@ -780,6 +799,8 @@ function createClientFromForm() {
   if (!client) return null;
   clients.push(client);
   saveClientToStorage(client);
+  clientCompetences[client.cnpj] = [...new Set([...(clientCompetences[client.cnpj] || []), state.selectedMonth])];
+  saveClientCompetences(clientCompetences);
   return client;
 }
 
