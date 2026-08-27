@@ -837,35 +837,35 @@
 .fiscal-client-picker-trigger .fiscal-client-picker-chevron { font-size:14px; }
 
 /* Cores por status no acompanhamento das rotinas do cliente */
-.fiscal-focus-item-concluído {
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-concluído {
   border-color:#C9DEC4;
   border-left:3px solid #8BB184;
   background:#F1F8EF;
 }
-.fiscal-focus-item-concluído strong { color:#5D7D58; }
-.fiscal-focus-item-aguardando {
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-concluído strong { color:#5D7D58; }
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-aguardando {
   border-color:#E5D6B4;
   border-left:3px solid #C7A96A;
   background:#FBF6E9;
 }
-.fiscal-focus-item-aguardando strong { color:#927A52; }
-.fiscal-focus-item-em-análise {
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-aguardando strong { color:#927A52; }
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-em-análise {
   border-color:#E7C9C0;
   border-left:3px solid #D4A092;
   background:#FFF5F1;
 }
-.fiscal-focus-item-em-análise strong { color:#A96559; }
-.fiscal-focus-item-pendente {
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-em-análise strong { color:#A96559; }
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-pendente {
   border-color:#E3B9B0;
   border-left:3px solid #C77D6E;
   background:#FFF0ED;
 }
-.fiscal-focus-item-pendente strong { color:#A96559; }
-.fiscal-focus-item-desobrigado,
-.fiscal-focus-item-não-aplica {
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-pendente strong { color:#A96559; }
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-desobrigado,
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-não-aplica {
   border-color:#DDDFD7;
   border-left:3px solid #AAB0A3;
   background:#F3F4F0;
 }
-.fiscal-focus-item-desobrigado strong,
-.fiscal-focus-item-não-aplica strong { color:#7C8177; }
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-desobrigado strong,
+.fiscal-focus-zone .fiscal-focus-item.fiscal-focus-item-não-aplica strong { color:#7C8177; }
