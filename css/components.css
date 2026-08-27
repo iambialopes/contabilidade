@@ -607,3 +607,72 @@
   background:#FFF;
   color:#A86F63;
 }
+
+/* Seletor de competência exclusivo do cabeçalho Fiscal */
+.fiscal-hero-controls {
+  display:grid;
+  grid-template-columns:minmax(150px,.85fr) minmax(205px,1.15fr);
+  gap:10px;
+  min-width:min(100%,430px);
+}
+.fiscal-hero-competence,
+.fiscal-hero-client {
+  min-width:0;
+  padding:14px 15px;
+  border:1px solid #DCE4D5;
+  border-radius:14px;
+  background:#FFF;
+}
+.fiscal-hero-competence > span,
+.fiscal-hero-client span,
+.fiscal-hero-client small {
+  display:block;
+  color:#899184;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.fiscal-hero-competence .competence-selectors {
+  display:grid;
+  grid-template-columns:78px minmax(0,1fr);
+  gap:7px;
+  margin-top:7px;
+}
+.fiscal-hero-competence .month-select-field {
+  align-items:stretch;
+  flex-direction:column;
+  gap:4px;
+  color:#899184;
+  font-size:8px;
+  letter-spacing:.06em;
+}
+.fiscal-hero-competence .month-select-field select {
+  width:100%;
+  min-width:0;
+  padding:8px 24px 8px 8px;
+  border-color:#D9DED2;
+  border-radius:8px;
+  background:var(--cream);
+  color:#52604D;
+  font-size:10px;
+  font-weight:700;
+}
+.fiscal-hero-competence .month-select-field select:focus {
+  border-color:#D4A092;
+  outline:none;
+  box-shadow:0 0 0 2px var(--peach-soft);
+}
+.fiscal-hero-controls .fiscal-hero-client {
+  box-shadow:none;
+}
+.fiscal-hero-controls .fiscal-hero-client select {
+  margin-top:7px;
+}
+@media (max-width:1100px) {
+  .fiscal-hero-controls { width:100%; min-width:0; max-width:560px; }
+}
+@media (max-width:700px) {
+  .fiscal-hero-controls { grid-template-columns:1fr; max-width:none; }
+  .fiscal-hero-competence .competence-selectors { grid-template-columns:88px minmax(0,1fr); }
+}

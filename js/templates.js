@@ -170,14 +170,14 @@ function getCompetenceYear(label) {
   return yearToken.length === 2 ? 2000 + year : year;
 }
 
-function competenceSelectors(selectedMonth, selectedYear, months) {
+function competenceSelectors(selectedMonth, selectedYear, months, prefix = 'overview') {
   const sortedMonths = [...months].sort((a, b) => monthSortValue(a) - monthSortValue(b));
   const years = [...new Set(sortedMonths.map(getCompetenceYear).filter(Boolean))].sort((a, b) => a - b);
   const activeYear = Number(selectedYear) || getCompetenceYear(selectedMonth) || years[years.length - 1];
   const monthsForYear = sortedMonths.filter((month) => getCompetenceYear(month) === activeYear);
   const yearOptions = years.map((year) => `<option value="${year}" ${year === activeYear ? 'selected' : ''}>${year}</option>`).join('');
   const monthOptions = monthsForYear.map((month) => `<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`).join('');
-  return `<div class="competence-selectors"><label class="month-select-field"><span>Ano</span><select id="overview-year-select" aria-label="Selecionar ano">${yearOptions}</select></label><label class="month-select-field"><span>Mês</span><select id="overview-month-select" aria-label="Selecionar mês">${monthOptions}</select></label></div>`;
+  return `<div class="competence-selectors ${prefix === 'fiscal' ? 'fiscal-competence-selectors' : ''}"><label class="month-select-field"><span>Ano</span><select id="${prefix}-year-select" aria-label="Selecionar ano da ${prefix === 'fiscal' ? 'competência Fiscal' : 'Visão geral'}">${yearOptions}</select></label><label class="month-select-field"><span>Mês</span><select id="${prefix}-month-select" aria-label="Selecionar mês da ${prefix === 'fiscal' ? 'competência Fiscal' : 'Visão geral'}">${monthOptions}</select></label></div>`;
 }
 
 function renderDeleteCompetenceConfirmation(month) {
@@ -331,7 +331,7 @@ function renderLowerPanels(selectedClient) {
   `;
 }
 
-function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalRows, filteredRows, filters, summary, deadlines, history }) {
+function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history }) {
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
   const statusClass = (value) => String(value || '').toLowerCase().replaceAll(' ', '-').replaceAll('ã', 'a').replaceAll('á', 'a');
   const selectStatus = (row, field) => `<select class="fiscal-status-select fiscal-status-${statusClass(row[field])}" data-fiscal-status="${field}" data-fiscal-client="${row.cnpj}" aria-label="${field} de ${row.name}">${statusOptions.map((option) => `<option ${row[field] === option ? 'selected' : ''}>${option}</option>`).join('')}</select>`;
@@ -342,8 +342,8 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalR
     <section class="fiscal-zone fiscal-focus-zone" aria-labelledby="fiscal-focus-zone-title">
       <div class="fiscal-zone-heading"><div><p class="eyebrow">Acompanhamento individual</p><h3 id="fiscal-focus-zone-title">Cliente em foco</h3></div><span>1 empresa selecionada</span></div>
     <section class="fiscal-hero">
-      <div><p class="eyebrow">Controle fiscal da competência</p><h2>Fiscal · ${selectedMonth}</h2><p>Acompanhe as obrigações de cada empresa, identifique pendências e registre o andamento do período.</p></div>
-      <div class="fiscal-hero-client"><span>Cliente em foco desta tela</span><select id="fiscal-focus-client" aria-label="Selecionar cliente em foco">${[...clients].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')).map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient?.cnpj ? 'selected' : ''}>${client.name}</option>`).join('')}</select><small>${selectedClient?.cnpj || ''} · ${selectedClient?.city || ''}</small></div>
+      <div class="fiscal-hero-copy"><p class="eyebrow">Controle fiscal da competência</p><h2>Fiscal · ${selectedMonth}</h2><p>Acompanhe as obrigações de cada empresa, identifique pendências e registre o andamento do período.</p></div>
+      <div class="fiscal-hero-controls"><div class="fiscal-hero-competence"><span>Competência desta tela</span>${competenceSelectors(selectedMonth, getCompetenceYear(selectedMonth), months, 'fiscal')}</div><div class="fiscal-hero-client"><span>Cliente em foco desta tela</span><select id="fiscal-focus-client" aria-label="Selecionar cliente em foco">${[...clients].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')).map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient?.cnpj ? 'selected' : ''}>${client.name}</option>`).join('')}</select><small>${selectedClient?.cnpj || ''} · ${selectedClient?.city || ''}</small></div></div>
     </section>
     <section class="fiscal-focus-panel panel">
       <div class="section-heading fiscal-focus-heading"><div><p class="eyebrow">Acompanhamento do cliente</p><h3>${focusRow?.name || 'Nenhum cliente selecionado'}</h3><small>${focusRow?.cnpj || ''} · ${focusRow?.city || ''} · ${focusRow?.tax || ''}</small></div><span class="fiscal-overall fiscal-overall-${statusClass(focusRow?.overall)}">${focusRow?.overall || 'Aguardando'}</span></div>

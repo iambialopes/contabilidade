@@ -4,6 +4,7 @@ window.CorreaState = {
   selectedClientCnpj: '42.910.621/0001-52',
   fiscalSelectedClientCnpj: '',
   selectedMonth: 'AGOSTO 26',
+  fiscalSelectedMonth: 'AGOSTO 26',
   activeOnly: true,
   clientListExpanded: false,
   searchTerm: '',
