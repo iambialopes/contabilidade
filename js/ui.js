@@ -68,7 +68,7 @@ function getVisibleClients(month = state.selectedMonth) {
     return { ...current, ...snapshot, tone: current?.tone || snapshot.tone, initials: current?.initials || snapshot.initials };
   });
   const addedForMonth = clients.filter((client) => clientCompetences[client.cnpj]?.includes(month) && !snapshotCnpjs.has(normalizeDocument(client.cnpj)));
-  return [...snapshotClients, ...addedForMonth];
+  return [...snapshotClients, ...addedForMonth].sort((firstClient, secondClient) => clientNameCollator.compare(firstClient.name, secondClient.name));
 }
 
 function getClientByCnpj(cnpj) {
