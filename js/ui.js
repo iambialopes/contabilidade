@@ -472,7 +472,7 @@ function bindActions() {
   });
 
   document.querySelectorAll('[data-action="new-client"]').forEach((element) => {
-    element.addEventListener('click', openModal);
+    element.addEventListener('click', () => openModal());
   });
 
   document.querySelectorAll('[data-action="toggle-client-list"]').forEach((element) => {
