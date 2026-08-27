@@ -541,54 +541,67 @@
   .fiscal-zone { transition:box-shadow .18s ease-out,border-color .18s ease-out; }
 }
 
-/* Acentos da identidade Corrêa: rosa e salmão com verde de apoio */
+/* Acentos da identidade Corrêa: salmão aplicado somente como detalhe */
 .fiscal-focus-zone {
-  background:linear-gradient(135deg,#F8EAE5 0%,#F6F3EC 58%,#EEF4EA 100%);
-  border-color:#E8CDC4;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 12px 28px rgba(200,143,130,.10);
+  background:var(--cream);
+  border:1px solid #E3E0D7;
+  border-top:3px solid #D4A092;
+  box-shadow:var(--shadow);
 }
 .fiscal-focus-zone .fiscal-zone-heading {
-  border-bottom-color:#E7C6BC;
+  border-bottom-color:#E3E0D7;
 }
 .fiscal-focus-zone .fiscal-zone-heading .eyebrow {
   color:#B9786B;
 }
 .fiscal-focus-zone .fiscal-zone-heading > span {
   border-color:#E5C8BF;
-  background:#FFF8F5;
+  background:#FFF;
   color:#A86F63;
 }
 .fiscal-focus-zone .fiscal-hero {
-  border-color:#E7CFC7;
-  background:linear-gradient(120deg,#FFF8F5 0%,#F5F5EE 100%);
-  box-shadow:0 8px 20px rgba(200,143,130,.08);
+  border-color:#E1DED4;
+  background:var(--paper);
+  box-shadow:var(--shadow);
 }
 .fiscal-focus-zone .fiscal-hero-client {
-  border-color:#E4C4BA;
-  background:#FFFAF7;
-  box-shadow:0 5px 12px rgba(200,143,130,.06);
+  border-color:#DCE4D5;
+  background:#FFF;
+  box-shadow:none;
 }
 .fiscal-focus-zone .fiscal-hero-client select:focus {
   box-shadow:0 0 0 2px var(--peach-soft);
 }
 .fiscal-focus-zone .fiscal-focus-panel {
-  border-color:#E8D5CE;
-  background:#FFFDFB;
-  box-shadow:0 8px 20px rgba(200,143,130,.07);
+  border-color:#E5E1D8;
+  background:var(--paper);
+  box-shadow:var(--shadow);
 }
 .fiscal-focus-zone .fiscal-focus-item {
-  border-color:#EBDDD7;
-  background:#FFFAF7;
+  border-color:#E5E8DF;
+  background:#FAFBF8;
 }
-.fiscal-focus-zone .fiscal-overall,
-.fiscal-overview-zone .fiscal-zone-heading > span {
-  border:1px solid #E8C9BF;
-  background:var(--peach-soft);
-  color:#A86F63;
+.fiscal-focus-zone .fiscal-overall {
+  border:0;
+  background:#F5F1E4;
+  color:#927A52;
+}
+.fiscal-focus-zone .fiscal-overall-em-dia {
+  background:#EDF6EA;
+  color:#5D7D58;
+}
+.fiscal-focus-zone .fiscal-overall-atenção {
+  background:#FFF1ED;
+  color:#A96559;
+}
+.fiscal-overview-zone {
+  border-top:3px solid #8FA0AA;
 }
 .fiscal-overview-zone .fiscal-zone-heading .eyebrow {
   color:var(--olive);
 }
 .fiscal-overview-zone .fiscal-zone-heading > span {
-  border-color:#E5D0C7;
+  border-color:#E5C8BF;
+  background:#FFF;
+  color:#A86F63;
 }
