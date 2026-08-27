@@ -331,14 +331,21 @@ function renderLowerPanels(selectedClient) {
   `;
 }
 
-function renderFiscalDashboard({ clients, selectedClient, selectedMonth, filteredRows, filters, summary, deadlines, history }) {
+function renderFiscalDashboard({ clients, selectedClient, selectedMonth, fiscalRows, filteredRows, filters, summary, deadlines, history }) {
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
   const statusClass = (value) => String(value || '').toLowerCase().replaceAll(' ', '-').replaceAll('ã', 'a').replaceAll('á', 'a');
   const selectStatus = (row, field) => `<select class="fiscal-status-select fiscal-status-${statusClass(row[field])}" data-fiscal-status="${field}" data-fiscal-client="${row.cnpj}" aria-label="${field} de ${row.name}">${statusOptions.map((option) => `<option ${row[field] === option ? 'selected' : ''}>${option}</option>`).join('')}</select>`;
+  const focusRow = fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0];
+  const focusItems = [['notas', 'Notas'], ['apuracao', 'Apuração'], ['pgdas', 'PGDAS'], ['guia', 'Guia'], ['sintegra', 'Sintegra'], ['dstda', 'DSTDA'], ['livroEletronico', 'Livro eletrônico'], ['efdReinf', 'EFD Reinf']];
   return `
+    <div class="fiscal-dashboard-shell">
     <section class="fiscal-hero">
       <div><p class="eyebrow">Controle fiscal da competência</p><h2>Fiscal · ${selectedMonth}</h2><p>Acompanhe as obrigações de cada empresa, identifique pendências e registre o andamento do período.</p></div>
-      <div class="fiscal-hero-client"><span>Cliente em foco</span><strong>${selectedClient?.name || 'Nenhum cliente selecionado'}</strong><small>${selectedClient?.cnpj || ''} · ${selectedClient?.city || ''}</small></div>
+      <div class="fiscal-hero-client"><span>Cliente em foco desta tela</span><select id="fiscal-focus-client" aria-label="Selecionar cliente em foco">${[...clients].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')).map((client) => `<option value="${client.cnpj}" ${client.cnpj === selectedClient?.cnpj ? 'selected' : ''}>${client.name}</option>`).join('')}</select><small>${selectedClient?.cnpj || ''} · ${selectedClient?.city || ''}</small></div>
+    </section>
+    <section class="fiscal-focus-panel panel">
+      <div class="section-heading fiscal-focus-heading"><div><p class="eyebrow">Acompanhamento do cliente</p><h3>${focusRow?.name || 'Nenhum cliente selecionado'}</h3><small>${focusRow?.cnpj || ''} · ${focusRow?.city || ''} · ${focusRow?.tax || ''}</small></div><span class="fiscal-overall fiscal-overall-${statusClass(focusRow?.overall)}">${focusRow?.overall || 'Aguardando'}</span></div>
+      <div class="fiscal-focus-grid">${focusItems.map(([key, label]) => `<div class="fiscal-focus-item"><span>${label}</span><strong class="fiscal-focus-status-${statusClass(focusRow?.[key])}">${focusRow?.[key] || 'Aguardando'}</strong></div>`).join('')}</div>
     </section>
     <section class="fiscal-summary-grid">
       ${summaryCard('✓', 'Clientes em dia', String(summary.done), `de ${summary.total} acompanhados`)}
@@ -354,16 +361,18 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, filtere
         <select data-fiscal-filter="tax"><option value="">Todas as tributações</option>${[...new Set(clients.map((client) => client.tax).filter(Boolean))].sort().map((tax) => `<option ${filters.tax === tax ? 'selected' : ''}>${tax}</option>`).join('')}</select>
         <select data-fiscal-filter="city"><option value="">Todas as cidades</option>${[...new Set(clients.map((client) => client.city).filter(Boolean))].sort().map((city) => `<option ${filters.city === city ? 'selected' : ''}>${city}</option>`).join('')}</select>
         <select data-fiscal-filter="obligation"><option value="">Todas as obrigações</option>${['notas', 'apuracao', 'pgdas', 'guia', 'sintegra', 'dstda', 'livroEletronico', 'efdReinf'].map((key) => `<option value="${key}" ${filters.obligation === key ? 'selected' : ''}>${{ notas: 'Notas', apuracao: 'Apuração', pgdas: 'PGDAS', guia: 'Guia', sintegra: 'Sintegra', dstda: 'DSTDA', livroEletronico: 'Livro eletrônico', efdReinf: 'EFD Reinf' }[key]}</option>`).join('')}</select>
-        <button class="text-button" data-action="clear-fiscal-filters">Limpar filtros</button>
+        <button class="text-button" data-action="clear-fiscal-filters">Limpar filtros</button><button class="filter-button export-button" data-action="export-fiscal-pdf" type="button">⇩ Exportar PDF</button>
       </div>
-    </section>
-    <section class="fiscal-table-panel panel">
-      <div class="fiscal-table-scroll"><table class="fiscal-table"><thead><tr><th>Cliente</th><th>Tributação</th><th>Notas</th><th>Apuração</th><th>PGDAS</th><th>Guia</th><th>Sintegra</th><th>DSTDA</th><th>Livro eletrônico</th><th>EFD Reinf</th><th>Situação geral</th></tr></thead><tbody>${filteredRows.map((row) => `<tr><td><strong>${row.name}</strong><small>${row.cnpj} · ${row.city}</small></td><td>${row.tax}</td><td>${selectStatus(row, 'notas')}</td><td>${selectStatus(row, 'apuracao')}</td><td>${selectStatus(row, 'pgdas')}</td><td>${selectStatus(row, 'guia')}</td><td>${selectStatus(row, 'sintegra')}</td><td>${selectStatus(row, 'dstda')}</td><td>${selectStatus(row, 'livroEletronico')}</td><td>${selectStatus(row, 'efdReinf')}</td><td><span class="fiscal-overall fiscal-overall-${statusClass(row.overall)}">${row.overall}</span></td></tr>`).join('') || '<tr><td colspan="11" class="fiscal-empty">Nenhum cliente encontrado para os filtros selecionados.</td></tr>'}</tbody></table></div>
-      <div class="fiscal-table-footer"><span>${filteredRows.length} clientes exibidos</span><span>Competência ${selectedMonth}</span></div>
     </section>
     <div class="fiscal-lower-grid">
       <section class="panel fiscal-deadlines"><div class="section-heading"><div><p class="eyebrow">Agenda fiscal</p><h3>Próximos vencimentos</h3></div><button class="text-button" data-action="toast" data-message="A agenda de vencimentos será ampliada na próxima etapa.">＋ Adicionar prazo</button></div>${deadlines.map((item) => `<div class="fiscal-deadline-item"><div><strong>${item.name}</strong><small>${item.detail}</small></div><span>${item.due}</span></div>`).join('')}</section>
       <section class="panel fiscal-history"><div class="section-heading"><div><p class="eyebrow">Registro de alterações</p><h3>Histórico fiscal</h3></div></div>${history.length ? history.slice(0, 6).map((item) => `<div class="fiscal-history-item"><strong>${item.text}</strong><small>${item.date}</small></div>`).join('') : '<p class="fiscal-empty-copy">As alterações realizadas nesta competência aparecerão aqui.</p>'}</section>
+    </div>
+    <section class="fiscal-table-panel fiscal-table-panel-compact panel">
+      <div class="section-heading fiscal-list-heading"><div><p class="eyebrow">Consulta completa</p><h3>Todos os clientes</h3></div><span>${filteredRows.length} exibidos</span></div>
+      <div class="fiscal-table-scroll"><table class="fiscal-table"><thead><tr><th>Cliente</th><th>Tributação</th><th>Notas</th><th>Apuração</th><th>PGDAS</th><th>Guia</th><th>Sintegra</th><th>DSTDA</th><th>Livro eletrônico</th><th>EFD Reinf</th><th>Situação geral</th></tr></thead><tbody>${filteredRows.map((row) => `<tr><td><strong>${row.name}</strong><small>${row.cnpj} · ${row.city}</small></td><td>${row.tax}</td><td>${selectStatus(row, 'notas')}</td><td>${selectStatus(row, 'apuracao')}</td><td>${selectStatus(row, 'pgdas')}</td><td>${selectStatus(row, 'guia')}</td><td>${selectStatus(row, 'sintegra')}</td><td>${selectStatus(row, 'dstda')}</td><td>${selectStatus(row, 'livroEletronico')}</td><td>${selectStatus(row, 'efdReinf')}</td><td><span class="fiscal-overall fiscal-overall-${statusClass(row.overall)}">${row.overall}</span></td></tr>`).join('') || '<tr><td colspan="11" class="fiscal-empty">Nenhum cliente encontrado para os filtros selecionados.</td></tr>'}</tbody></table></div>
+      <div class="fiscal-table-footer"><span>${filteredRows.length} clientes exibidos</span><span>Competência ${selectedMonth}</span></div>
+    </section>
     </div>`;
 }
 

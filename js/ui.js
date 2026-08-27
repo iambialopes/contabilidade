@@ -3,6 +3,8 @@
 const { clients, departments, departmentsData, monthHistory = {}, months = [] } = window.CorreaData;
 const originalMonthKeys = new Set(months);
 const state = window.CorreaState;
+const fiscalFocusStorageKey = 'correa-controle-interno-fiscal-focus-client';
+state.fiscalSelectedClientCnpj ||= localStorage.getItem(fiscalFocusStorageKey) || '';
 let competenceDraft = null;
 let competenceTargetMonth = '';
 const pageContent = document.querySelector('#page-content');
@@ -124,7 +126,7 @@ function getFiscalDeadlines() { return [{ name: 'Apuração e fechamento fiscal'
 function getFiscalFilteredRows(rows) { const filters = state.fiscalFilters || { search: '', status: '', tax: '', city: '', obligation: '' }; const fields = ['notas', 'apuracao', 'pgdas', 'guia', 'sintegra', 'dstda', 'livroEletronico', 'efdReinf']; return rows.filter((row) => { const search = String(filters.search || '').toLowerCase(); const matchesStatus = !filters.status || row.overall === filters.status || fields.some((field) => row[field] === filters.status); const matchesObligation = !filters.obligation || row[filters.obligation] === filters.status || !filters.status; return (!search || `${row.name} ${row.cnpj} ${row.city}`.toLowerCase().includes(search)) && matchesStatus && matchesObligation && (!filters.tax || row.tax === filters.tax) && (!filters.city || row.city === filters.city); }); }
 
 function getPageTemplate() {
-  const selectedClient = getSelectedClient();
+  const selectedClient = state.currentPage === 'fiscal' ? getFiscalSelectedClient() : getSelectedClient();
   const clientsSection = state.currentPage === 'overview' ? getClientsSection() : '';
   const lowerPanels = state.currentPage === 'overview' ? renderLowerPanels(selectedClient) : '';
 
@@ -146,6 +148,7 @@ function getPageTemplate() {
     const filters = state.fiscalFilters || { search: '', status: '', tax: '', city: '', obligation: '' };
     return renderFiscalDashboard({
       clients: getVisibleClients(),
+      fiscalRows,
       selectedClient,
       selectedMonth: state.selectedMonth,
       filteredRows: getFiscalFilteredRows(fiscalRows),
@@ -198,6 +201,11 @@ function getFilteredClients() {
 function getSelectedClient() {
   const visibleClients = getVisibleClients();
   return visibleClients.find((client) => client.cnpj === state.selectedClientCnpj) || visibleClients[0] || clients[0];
+}
+function getFiscalSelectedClient() {
+  const visibleClients = getVisibleClients();
+  if (!state.fiscalSelectedClientCnpj || !visibleClients.some((client) => client.cnpj === state.fiscalSelectedClientCnpj)) state.fiscalSelectedClientCnpj = visibleClients[0]?.cnpj || clients[0]?.cnpj || '';
+  return visibleClients.find((client) => client.cnpj === state.fiscalSelectedClientCnpj) || visibleClients[0] || clients[0];
 }
 
 function loadRoutineProgress() {
@@ -795,8 +803,23 @@ function bindFiscalControls() {
     store[month].history.unshift({ text: `${client?.name || 'Cliente'}: ${field} alterado para ${value}.`, date: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date()) });
     saveFiscalStore(store);
   };
+  document.querySelector('#fiscal-focus-client')?.addEventListener('change', (event) => { state.fiscalSelectedClientCnpj = event.target.value; localStorage.setItem(fiscalFocusStorageKey, state.fiscalSelectedClientCnpj); renderApp(); });
   document.querySelector('#fiscal-search')?.addEventListener('input', (event) => { state.fiscalFilters.search = event.target.value; renderApp(); });
   document.querySelectorAll('[data-fiscal-filter]').forEach((select) => select.addEventListener('change', (event) => { state.fiscalFilters[event.target.dataset.fiscalFilter] = event.target.value; renderApp(); }));
   document.querySelector('[data-action="clear-fiscal-filters"]')?.addEventListener('click', () => { state.fiscalFilters = { search: '', status: '', tax: '', city: '', obligation: '' }; renderApp(); });
+  document.querySelector('[data-action="export-fiscal-pdf"]')?.addEventListener('click', () => exportFiscalPdf(getFiscalFilteredRows(getFiscalRows())));
   document.querySelectorAll('[data-fiscal-status]').forEach((select) => select.addEventListener('change', (event) => { recordChange(event.target.dataset.fiscalClient, event.target.dataset.fiscalStatus, event.target.value); renderApp(); showToast('Situação fiscal atualizada.'); }));
+}
+
+function exportFiscalPdf(rows) {
+  const focus = getFiscalSelectedClient();
+  const labels = { notas: 'Notas', apuracao: 'Apuração', pgdas: 'PGDAS', guia: 'Guia', sintegra: 'Sintegra', dstda: 'DSTDA', livroEletronico: 'Livro eletrônico', efdReinf: 'EFD Reinf' };
+  const fields = Object.keys(labels);
+  printRoot.innerHTML = `<article class="print-report fiscal-print-report"><header class="print-report-header"><div><p class="eyebrow">Corrêa Controle Interno</p><h1>Relatório fiscal</h1><p>Competência ${state.selectedMonth} · Cliente em foco: ${focus?.name || 'não selecionado'}</p></div><div class="print-report-date">Emitido em ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date())}</div></header><section class="print-filters"><strong>Resumo do cliente em foco</strong><span><b>Empresa:</b> ${focus?.name || '—'}</span><span><b>Documento:</b> ${focus?.cnpj || '—'}</span><span><b>Cidade:</b> ${focus?.city || '—'}</span><span><b>Tributação:</b> ${focus?.tax || '—'}</span></section><p class="print-report-count">${rows.length} empresa${rows.length === 1 ? '' : 's'} no controle fiscal</p><table><thead><tr><th>Cliente</th><th>Tributação</th>${fields.map((field) => `<th>${labels[field]}</th>`).join('')}<th>Situação geral</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row.name}<br><small>${row.cnpj} · ${row.city}</small></td><td>${row.tax || '—'}</td>${fields.map((field) => `<td>${row[field] || 'Aguardando'}</td>`).join('')}<td>${row.overall}</td></tr>`).join('')}</tbody></table></article>`;
+  document.body.classList.add('printing-report');
+  showToast('Relatório fiscal pronto. Na impressão, escolha “Salvar como PDF”.');
+  const cleanup = () => { printRoot.innerHTML = ''; document.body.classList.remove('printing-report'); window.removeEventListener('afterprint', cleanup); };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+  window.setTimeout(cleanup, 3000);
 }

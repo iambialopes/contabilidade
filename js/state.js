@@ -2,6 +2,7 @@
 window.CorreaState = {
   currentPage: getPageFromHash(),
   selectedClientCnpj: '42.910.621/0001-52',
+  fiscalSelectedClientCnpj: '',
   selectedMonth: 'AGOSTO 26',
   activeOnly: true,
   clientListExpanded: false,
@@ -14,7 +15,7 @@ window.CorreaState = {
     fiscalClosing: '',
     status: 'active'
   },
-  fiscalFilters: { search: '', status: '', tax: '' }
+  fiscalFilters: { search: '', status: '', tax: '', city: '', obligation: '' }
 };
 
 function getPageFromHash() {
