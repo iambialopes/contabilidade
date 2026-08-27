@@ -546,6 +546,7 @@
   background:var(--cream);
   border:1px solid #E3E0D7;
   border-top:3px solid #D4A092;
+  border-bottom:3px solid #D4A092;
   box-shadow:var(--shadow);
 }
 .fiscal-focus-zone .fiscal-zone-heading {
@@ -596,6 +597,7 @@
 }
 .fiscal-overview-zone {
   border-top:3px solid #8FA0AA;
+  border-bottom:3px solid #8FA0AA;
 }
 .fiscal-overview-zone .fiscal-zone-heading .eyebrow {
   color:var(--olive);
