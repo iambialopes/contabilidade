@@ -635,7 +635,7 @@
 }
 .fiscal-hero-competence .competence-selectors {
   display:grid;
-  grid-template-columns:78px minmax(0,1fr);
+  grid-template-columns:68px minmax(126px,1fr);
   gap:7px;
   margin-top:7px;
 }
@@ -650,7 +650,7 @@
 .fiscal-hero-competence .month-select-field select {
   width:100%;
   min-width:0;
-  padding:8px 24px 8px 8px;
+  padding:8px 18px 8px 8px;
   border-color:#D9DED2;
   border-radius:8px;
   background:var(--cream);
@@ -674,5 +674,5 @@
 }
 @media (max-width:700px) {
   .fiscal-hero-controls { grid-template-columns:1fr; max-width:none; }
-  .fiscal-hero-competence .competence-selectors { grid-template-columns:88px minmax(0,1fr); }
+  .fiscal-hero-competence .competence-selectors { grid-template-columns:76px minmax(126px,1fr); }
 }
