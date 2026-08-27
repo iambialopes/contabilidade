@@ -166,7 +166,9 @@ function getPageTemplate() {
       filters,
       summary: getFiscalSummary(fiscalRows),
       deadlines: getFiscalDeadlines(),
-      history: getFiscalHistory()
+      history: getFiscalHistory(),
+      routineItems: getFiscalRoutineItems(fiscalMonth, selectedClient?.cnpj || ''),
+      routineDetails: getFiscalRoutineDetailsForClient(fiscalMonth, selectedClient?.cnpj || '', fiscalRows.find((row) => row.cnpj === selectedClient?.cnpj) || fiscalRows[0])
     });
   }
 
@@ -221,6 +223,68 @@ function getFiscalSelectedClient(month = getFiscalMonth()) {
 
 function loadRoutineProgress() {
   try { return JSON.parse(localStorage.getItem(routineProgressStorageKey) || '{}'); } catch (error) { return {}; }
+}
+
+const fiscalRoutineDetailsStorageKey = 'correa-controle-interno-fiscal-routine-details';
+const fiscalRoutineDefinitions = {
+  notas: { title: 'Importação das notas', description: 'Receber XML, validar o período e organizar os documentos fiscais.', due: 'Hoje', responsible: 'Fiscal', checklist: [{ text: 'Documentos recebidos', done: false }, { text: 'Período conferido', done: false }, { text: 'Arquivos organizados', done: false }] },
+  apuracao: { title: 'Apuração na Domínio', description: 'Conferir impostos, bases de cálculo e documentos antes da transmissão.', due: '20 AGO', responsible: 'Fiscal', checklist: [{ text: 'Movimento conferido', done: false }, { text: 'Impostos apurados', done: false }, { text: 'Memória de cálculo revisada', done: false }] },
+  pgdas: { title: 'Transmissão PGDAS', description: 'Transmitir a declaração e salvar o protocolo do cliente.', due: '21 AGO', responsible: 'Fiscal', checklist: [{ text: 'Faturamento conferido', done: false }, { text: 'PGDAS transmitido', done: false }, { text: 'Protocolo arquivado', done: false }] },
+  guia: { title: 'Envio da guia', description: 'Enviar a guia pelo canal combinado e registrar a confirmação do cliente.', due: '22 AGO', responsible: 'Fiscal', checklist: [{ text: 'Guia gerada', done: false }, { text: 'Guia enviada', done: false }, { text: 'Confirmação registrada', done: false }] },
+  sintegra: { title: 'Sintegra', description: 'Validar a obrigação estadual conforme a atividade e o enquadramento da empresa.', due: '25 AGO', responsible: 'Fiscal', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Arquivo conferido', done: false }, { text: 'Recibo arquivado', done: false }] },
+  dstda: { title: 'DSTDA', description: 'Verificar a obrigatoriedade, preparar a declaração e registrar o envio.', due: '25 AGO', responsible: 'Fiscal', checklist: [{ text: 'Obrigatoriedade verificada', done: false }, { text: 'Dados conferidos', done: false }, { text: 'Comprovante arquivado', done: false }] },
+  livroEletronico: { title: 'Livro eletrônico', description: 'Revisar os arquivos do período, recibos e eventuais pendências de retorno.', due: '27 AGO', responsible: 'Fiscal', checklist: [{ text: 'Movimento importado', done: false }, { text: 'Livro revisado', done: false }, { text: 'Recibo arquivado', done: false }] },
+  efdReinf: { title: 'EFD Reinf', description: 'Conferir os eventos, transmitir quando aplicável e acompanhar o retorno.', due: '27 AGO', responsible: 'Fiscal', checklist: [{ text: 'Eventos verificados', done: false }, { text: 'Transmissão realizada', done: false }, { text: 'Retorno conferido', done: false }] }
+};
+const fiscalRoutineLabels = Object.fromEntries(Object.entries(fiscalRoutineDefinitions).map(([key, detail]) => [key, detail.title]));
+function loadFiscalRoutineDetailsStore() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(fiscalRoutineDetailsStorageKey) || '{}');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+  } catch (error) { return {}; }
+}
+function saveFiscalRoutineDetailsStore(store) { localStorage.setItem(fiscalRoutineDetailsStorageKey, JSON.stringify(store)); }
+function cloneChecklist(items) { return (items || []).map((item) => ({ text: item.text, done: Boolean(item.done) })); }
+function getFiscalRoutineDetail(month, clientCnpj, routineKey, status = 'Aguardando') {
+  const fallback = fiscalRoutineDefinitions[routineKey] || { title: 'Nova rotina fiscal', description: '', due: 'Sem prazo', responsible: 'Fiscal', checklist: [] };
+  const saved = loadFiscalRoutineDetailsStore()[month]?.[clientCnpj]?.[routineKey] || {};
+  return { ...fallback, ...saved, status: fiscalRoutineDefinitions[routineKey] ? status : (saved.status || status), checklist: Array.isArray(saved.checklist) ? cloneChecklist(saved.checklist) : cloneChecklist(fallback.checklist), attachments: Array.isArray(saved.attachments) ? saved.attachments : [] };
+}
+function getFiscalRoutineItems(month, clientCnpj) {
+  const custom = loadFiscalRoutineDetailsStore()[month]?.[clientCnpj] || {};
+  const base = Object.entries(fiscalRoutineDefinitions).map(([key, detail]) => [key, detail.title]);
+  const customItems = Object.entries(custom).filter(([key]) => !fiscalRoutineDefinitions[key]).map(([key, detail]) => [key, detail.title || 'Nova rotina fiscal']);
+  return [...base, ...customItems];
+}
+function getFiscalRoutineDetailsForClient(month, clientCnpj, row) {
+  return Object.fromEntries(getFiscalRoutineItems(month, clientCnpj).map(([key]) => [key, getFiscalRoutineDetail(month, clientCnpj, key, row?.[key] || 'Aguardando')]));
+}
+function recordFiscalRoutineStatus(month, clientCnpj, routineKey, status) {
+  if (!fiscalRoutineDefinitions[routineKey]) return;
+  const store = loadFiscalStore();
+  store[month] ||= { history: [] };
+  store[month][clientCnpj] ||= { fields: {} };
+  store[month][clientCnpj].fields ||= {};
+  store[month][clientCnpj].fields[routineKey] = status;
+  store[month].history ||= [];
+  const client = getVisibleClients(month).find((item) => item.cnpj === clientCnpj);
+  store[month].history.unshift({ text: `${client?.name || 'Cliente'}: ${fiscalRoutineDefinitions[routineKey].title} atualizado para ${status}.`, date: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date()) });
+  saveFiscalStore(store);
+}
+
+function formatFileSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function loadSavedCompetencies() {
@@ -869,6 +933,8 @@ function bindFiscalControls() {
   document.querySelector('[data-action="clear-fiscal-filters"]')?.addEventListener('click', () => { state.fiscalFilters = { search: '', status: '', tax: '', city: '', obligation: '' }; renderApp(); });
   document.querySelector('[data-action="export-fiscal-pdf"]')?.addEventListener('click', () => exportFiscalPdf(getFiscalFilteredRows(getFiscalRows())));
   document.querySelectorAll('[data-fiscal-status]').forEach((select) => select.addEventListener('change', (event) => { recordChange(event.target.dataset.fiscalClient, event.target.dataset.fiscalStatus, event.target.value); renderApp(); showToast('Situação fiscal atualizada.'); }));
+  document.querySelectorAll('[data-action="open-fiscal-routine"]').forEach((card) => card.addEventListener('click', () => openFiscalRoutineModal(card.dataset.routine, card.dataset.client)));
+  document.querySelector('[data-action="new-fiscal-routine"]')?.addEventListener('click', (event) => openFiscalRoutineModal('', event.currentTarget.dataset.client, true));
 }
 
 function exportFiscalPdf(rows) {
@@ -882,4 +948,58 @@ function exportFiscalPdf(rows) {
   window.addEventListener('afterprint', cleanup);
   window.print();
   window.setTimeout(cleanup, 3000);
+}
+
+function openFiscalRoutineModal(routineKey, clientCnpj, isNew = false) {
+  const month = getFiscalMonth();
+  const client = getVisibleClients(month).find((item) => item.cnpj === clientCnpj) || getFiscalSelectedClient(month);
+  const row = getFiscalRows().find((item) => item.cnpj === client?.cnpj);
+  const actualKey = isNew ? `custom-${Date.now()}` : routineKey;
+  const detail = isNew
+    ? { title: '', description: '', due: 'Sem prazo', responsible: 'Fiscal', status: 'Aguardando', checklist: [{ text: 'Documentos necessários recebidos', done: false }, { text: 'Conferência realizada', done: false }, { text: 'Comprovante arquivado', done: false }], attachments: [], notes: '' }
+    : getFiscalRoutineDetail(month, client?.cnpj || '', routineKey, row?.[routineKey] || 'Aguardando');
+  const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
+  modalRoot.innerHTML = renderFiscalRoutineModal({ client, month, routineKey: actualKey, detail, statusOptions, isNew });
+  const closeRoutine = () => {
+    modalRoot.innerHTML = '';
+    window.removeEventListener('keydown', handleEscape);
+  };
+  const handleEscape = (event) => { if (event.key === 'Escape') closeRoutine(); };
+  const fileInput = document.querySelector('#fiscal-routine-files');
+  const pendingFiles = [];
+  const pendingFilesRoot = document.querySelector('#fiscal-routine-pending-files');
+  fileInput?.addEventListener('change', () => {
+    pendingFiles.splice(0, pendingFiles.length, ...(fileInput.files ? [...fileInput.files] : []));
+    if (pendingFilesRoot) pendingFilesRoot.innerHTML = pendingFiles.map((file) => `<span>${file.name} · ${formatFileSize(file.size)}</span>`).join('');
+  });
+  document.querySelector('#close-fiscal-routine')?.addEventListener('click', closeRoutine);
+  document.querySelector('#cancel-fiscal-routine')?.addEventListener('click', closeRoutine);
+  document.querySelector('#fiscal-routine-backdrop')?.addEventListener('click', (event) => { if (event.target.id === 'fiscal-routine-backdrop') closeRoutine(); });
+  document.querySelector('#save-fiscal-routine')?.addEventListener('click', async () => {
+    const error = document.querySelector('#fiscal-routine-error');
+    const title = document.querySelector('#fiscal-routine-title')?.value.trim();
+    if (!title) { error.textContent = 'Informe o nome da rotina para salvar.'; return; }
+    if (pendingFiles.some((file) => file.size > 2 * 1024 * 1024)) { error.textContent = 'Cada arquivo deve ter no máximo 2 MB nesta versão local.'; return; }
+    const existingSize = (detail.attachments || []).reduce((total, file) => total + Number(file.size || 0), 0);
+    const pendingSize = pendingFiles.reduce((total, file) => total + file.size, 0);
+    if (existingSize + pendingSize > 4 * 1024 * 1024) { error.textContent = 'O conjunto de anexos desta rotina deve ter no máximo 4 MB.'; return; }
+    const checklist = [...document.querySelectorAll('[data-fiscal-check]')].map((input) => ({ text: input.dataset.fiscalCheckText || input.nextElementSibling?.textContent || '', done: input.checked }));
+    try {
+      const newAttachments = await Promise.all(pendingFiles.map(async (file) => ({ name: file.name, type: file.type, size: file.size, sizeLabel: formatFileSize(file.size), dataUrl: await readFileAsDataUrl(file) })));
+      const updated = { ...detail, title, status: document.querySelector('#fiscal-routine-status')?.value || 'Aguardando', due: document.querySelector('#fiscal-routine-due')?.value.trim() || 'Sem prazo', responsible: document.querySelector('#fiscal-routine-responsible')?.value.trim() || 'Fiscal', description: document.querySelector('#fiscal-routine-description')?.value.trim() || '', notes: document.querySelector('#fiscal-routine-notes')?.value.trim() || '', checklist, attachments: [...(detail.attachments || []), ...newAttachments], updatedAt: new Date().toISOString() };
+      const store = loadFiscalRoutineDetailsStore();
+      store[month] ||= {};
+      store[month][client.cnpj] ||= {};
+      store[month][client.cnpj][actualKey] = updated;
+      saveFiscalRoutineDetailsStore(store);
+      recordFiscalRoutineStatus(month, client.cnpj, actualKey, updated.status);
+      closeRoutine();
+      renderApp();
+      showToast(isNew ? 'Nova rotina fiscal criada.' : 'Detalhes da rotina salvos.');
+    } catch (saveError) {
+      error.textContent = 'Não foi possível ler um dos arquivos selecionados. Tente novamente.';
+    }
+  });
+  window.addEventListener('keydown', handleEscape);
+  document.querySelector('#close-fiscal-routine')?.focus();
 }

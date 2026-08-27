@@ -899,3 +899,217 @@
   .fiscal-hero-competence,
   .fiscal-hero-client { height:auto; min-height:96px; }
 }
+
+/* Rotinas detalhadas do cliente em foco Fiscal */
+.fiscal-focus-routines {
+  margin-top:24px;
+  padding-top:22px;
+  border-top:1px solid #E8E5DD;
+}
+.fiscal-focus-routines > .section-heading {
+  align-items:center;
+  margin-bottom:14px;
+}
+.fiscal-focus-routines > .section-heading h3 {
+  margin:3px 0 0;
+  color:#455044;
+  font-family:var(--font-display, Georgia, serif);
+  font-size:25px;
+  font-weight:500;
+}
+.fiscal-focus-routines > .section-heading .primary-button {
+  min-height:34px;
+  padding:8px 12px;
+  font-size:10px;
+}
+.fiscal-routine-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.fiscal-routine-grid .routine-card {
+  min-height:142px;
+  padding:15px;
+  border:1px solid #E1E4DC;
+  border-top:3px solid #D4A092;
+  border-radius:12px;
+  background:#FFF;
+  color:#52604D;
+  text-align:left;
+  box-shadow:0 5px 15px rgba(63,70,60,.05);
+  cursor:pointer;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.fiscal-routine-grid .routine-card:hover,
+.fiscal-routine-grid .routine-card:focus-visible {
+  border-color:#D4A092;
+  box-shadow:0 10px 22px rgba(63,70,60,.11);
+  outline:none;
+  transform:translateY(-2px);
+}
+.fiscal-routine-grid .routine-card:active { transform:scale(.99); }
+.fiscal-routine-grid .routine-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.fiscal-routine-grid .routine-status {
+  display:inline-flex;
+  align-items:center;
+  min-height:23px;
+  padding:5px 8px;
+  border:1px solid #E6D8D2;
+  border-radius:6px;
+  color:#8C665B;
+  background:#FFF5F1;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.fiscal-routine-grid .routine-status.olive { color:#557351; background:#F1F8EF; border-color:#D3E3CE; }
+.fiscal-routine-grid .routine-status.sand { color:#80683F; background:#FBF6E9; border-color:#E8DAB9; }
+.fiscal-routine-grid .routine-status.blue { color:#5D7380; background:#F0F5F7; border-color:#D3E0E5; }
+.fiscal-routine-grid .routine-status.peach { color:#995F54; background:#FFF0ED; border-color:#EBC9C1; }
+.fiscal-routine-grid .due {
+  color:#8C9388;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.fiscal-routine-grid .routine-card h4 {
+  margin:18px 0 7px;
+  color:#4D594B;
+  font-family:var(--font-display, Georgia, serif);
+  font-size:18px;
+  font-weight:600;
+  line-height:1.15;
+}
+.fiscal-routine-grid .routine-card p {
+  min-height:31px;
+  margin:0;
+  color:#7B8278;
+  font-size:11px;
+  line-height:1.45;
+}
+.fiscal-routine-grid .routine-footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:13px;
+  padding-top:10px;
+  border-top:1px solid #EEECE6;
+  color:#899184;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.fiscal-routine-grid .routine-footer span:last-child { color:#A16D62; font-size:15px; }
+@media (max-width:900px) {
+  .fiscal-routine-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:600px) {
+  .fiscal-focus-routines > .section-heading { align-items:flex-start; flex-direction:column; }
+  .fiscal-focus-routines > .section-heading .primary-button { width:100%; }
+  .fiscal-routine-grid { grid-template-columns:1fr; }
+}
+
+/* Modal de detalhamento das rotinas fiscais */
+.fiscal-routine-modal {
+  width:min(760px, calc(100vw - 34px));
+  max-height:min(90vh,860px);
+  overflow:auto;
+  border-top:3px solid #D4A092;
+}
+.fiscal-routine-form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+  margin-top:22px;
+}
+.fiscal-routine-form-grid .form-field.wide { grid-column:1 / -1; }
+.fiscal-routine-modal .form-field { gap:7px; }
+.fiscal-routine-modal .form-field span,
+.fiscal-routine-modal .form-section-label {
+  color:#788276;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.fiscal-routine-modal .form-field input,
+.fiscal-routine-modal .form-field select,
+.fiscal-routine-modal .form-field textarea {
+  width:100%;
+  border:1px solid #E0DDD4;
+  border-radius:9px;
+  background:#FBFAF6;
+  color:#52604D;
+  font:500 12px/1.4 inherit;
+  outline:none;
+}
+.fiscal-routine-modal .form-field input,
+.fiscal-routine-modal .form-field select { min-height:38px; padding:0 10px; }
+.fiscal-routine-modal .form-field textarea { min-height:82px; padding:10px; resize:vertical; }
+.fiscal-routine-modal .form-field input:focus,
+.fiscal-routine-modal .form-field select:focus,
+.fiscal-routine-modal .form-field textarea:focus { border-color:#D4A092; box-shadow:0 0 0 3px #F7E7E1; }
+.fiscal-routine-detail-section {
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid #ECE9E1;
+}
+.fiscal-routine-detail-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:11px; }
+.fiscal-routine-detail-heading .form-section-label { margin:0 0 4px; }
+.fiscal-routine-detail-heading small { color:#92998E; font-size:10px; }
+.fiscal-routine-checklist { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.fiscal-routine-checklist label {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  min-height:43px;
+  padding:10px;
+  border:1px solid #E4E5DD;
+  border-radius:9px;
+  background:#FAFBF8;
+  color:#687366;
+  font-size:11px;
+  line-height:1.3;
+  cursor:pointer;
+}
+.fiscal-routine-checklist label:has(input:checked) { border-color:#C9DEC4; background:#F1F8EF; color:#557351; }
+.fiscal-routine-checklist input { flex:0 0 auto; width:15px; height:15px; margin:0; accent-color:#7E9A77; }
+.fiscal-routine-upload {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:54px;
+  border:1px dashed #D4A092;
+  border-radius:10px;
+  background:#FFF9F6;
+  color:#99665B;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.fiscal-routine-upload:hover { background:#FFF1ED; }
+.fiscal-routine-upload input { display:none; }
+.fiscal-routine-pending-files { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.fiscal-routine-pending-files span { padding:5px 8px; border-radius:6px; background:#F6F3EC; color:#737D70; font-size:10px; }
+.fiscal-routine-attachments { display:flex; flex-direction:column; gap:7px; margin-top:9px; }
+.fiscal-routine-attachment { display:flex; align-items:center; gap:8px; padding:9px 10px; border:1px solid #E6E2D9; border-radius:8px; background:#FBFAF6; color:#677263; }
+.fiscal-routine-attachment > span { color:#A16D62; }
+.fiscal-routine-attachment strong { flex:1; min-width:0; overflow:hidden; font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
+.fiscal-routine-attachment small { color:#92998E; font-size:10px; }
+.fiscal-routine-modal .form-error { min-height:18px; margin-top:13px; }
+@media (max-width:700px) {
+  .fiscal-routine-modal { width:calc(100vw - 22px); max-height:92vh; padding:20px; }
+  .fiscal-routine-form-grid { grid-template-columns:1fr; }
+  .fiscal-routine-form-grid .form-field.wide { grid-column:auto; }
+  .fiscal-routine-checklist { grid-template-columns:1fr; }
+  .fiscal-routine-modal .modal-actions { flex-direction:column-reverse; align-items:stretch; }
+  .fiscal-routine-modal .modal-actions button { width:100%; margin:0; }
+}

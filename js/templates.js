@@ -331,7 +331,7 @@ function renderLowerPanels(selectedClient) {
   `;
 }
 
-function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history }) {
+function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months, fiscalRows, filteredRows, filters, summary, deadlines, history, routineItems = [], routineDetails = {} }) {
   const statusOptions = ['Concluído', 'Pendente', 'Em análise', 'Aguardando', 'Não se aplica', 'Desobrigado'];
   const statusClass = (value) => String(value || '').toLowerCase().replaceAll(' ', '-').replaceAll('ã', 'a').replaceAll('á', 'a');
   const selectStatus = (row, field) => `<select class="fiscal-status-select fiscal-status-${statusClass(row[field])}" data-fiscal-status="${field}" data-fiscal-client="${row.cnpj}" aria-label="${field} de ${row.name}">${statusOptions.map((option) => `<option ${row[field] === option ? 'selected' : ''}>${option}</option>`).join('')}</select>`;
@@ -348,6 +348,40 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months,
     <section class="fiscal-focus-panel panel">
       <div class="section-heading fiscal-focus-heading"><div><p class="eyebrow">Acompanhamento do cliente</p><h3>${focusRow?.name || 'Nenhum cliente selecionado'}</h3><small>${focusRow?.cnpj || ''} · ${focusRow?.city || ''} · ${focusRow?.tax || ''}</small></div><span class="fiscal-overall fiscal-overall-${statusClass(focusRow?.overall)}">${focusRow?.overall || 'Aguardando'}</span></div>
       <div class="fiscal-focus-grid">${focusItems.map(([key, label]) => `<div class="fiscal-focus-item fiscal-focus-item-${statusClass(focusRow?.[key])}"><span>${label}</span><strong class="fiscal-focus-status-${statusClass(focusRow?.[key])}">${focusRow?.[key] || 'Aguardando'}</strong></div>`).join('')}</div>
+
+      <div class="fiscal-focus-routines">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Checklist do cliente</p>
+            <h3>Rotinas e próximos prazos</h3>
+          </div>
+          <button class="primary-button" data-action="new-fiscal-routine" data-client="${selectedClient?.cnpj}">＋ Nova rotina</button>
+        </div>
+        <div class="fiscal-routine-grid">
+          ${(routineItems.length ? routineItems : focusItems).map(([key, label]) => {
+            const detail = routineDetails[key] || {};
+            const status = detail.status || focusRow?.[key] || 'Aguardando';
+            const title = detail.title || label;
+            const description = detail.description || `Acompanhamento da obrigação ${label.toLowerCase()} para este período.`;
+            const due = detail.due || 'Sem prazo';
+            const tone = statusClass(status) === 'concluido' ? 'olive' : statusClass(status) === 'aguardando' ? 'sand' : statusClass(status) === 'pendente' ? 'peach' : statusClass(status) === 'em-analise' ? 'peach' : 'blue';
+            return `
+              <button class="routine-card" data-action="open-fiscal-routine" data-routine="${key}" data-client="${selectedClient?.cnpj}">
+                <div class="routine-top">
+                  <span class="routine-status ${tone}">${status}</span>
+                  <span class="due">${due}</span>
+                </div>
+                <h4>${title}</h4>
+                <p>${description}</p>
+                <div class="routine-footer">
+                  <span>${detail.responsible || `${selectedClient?.initials || 'CL'} · ${selectedClient?.tax || ''}`}</span>
+                  <span>↗</span>
+                </div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
     </section>
     </section>
     <section class="fiscal-zone fiscal-overview-zone" aria-labelledby="fiscal-overview-zone-title">
@@ -380,6 +414,51 @@ function renderFiscalDashboard({ clients, selectedClient, selectedMonth, months,
     </section>
     </section>
     </div>`;
+}
+
+function renderFiscalRoutineModal({ client, month, routineKey, detail, statusOptions, isNew = false }) {
+  const checklist = Array.isArray(detail.checklist) && detail.checklist.length ? detail.checklist : [
+    { text: 'Documentos do período recebidos', done: false },
+    { text: 'Conferência realizada', done: false },
+    { text: 'Protocolo ou comprovante arquivado', done: false }
+  ];
+  const attachments = Array.isArray(detail.attachments) ? detail.attachments : [];
+  return `
+    <div class="modal-backdrop" id="fiscal-routine-backdrop">
+      <div class="modal fiscal-routine-modal" role="dialog" aria-modal="true" aria-labelledby="fiscal-routine-modal-title">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">${isNew ? 'Nova rotina do cliente' : `Detalhamento da rotina · ${month}`}</p>
+            <h2 id="fiscal-routine-modal-title">${isNew ? 'Criar rotina fiscal' : escapeHtml(detail.title || 'Rotina fiscal')}</h2>
+            <p class="modal-description">${escapeHtml(client?.name || 'Cliente')} · ${escapeHtml(client?.cnpj || '')}</p>
+          </div>
+          <button class="close" id="close-fiscal-routine" aria-label="Fechar">×</button>
+        </div>
+        <div class="fiscal-routine-form-grid">
+          <label class="form-field wide"><span>Nome da rotina</span><input id="fiscal-routine-title" value="${escapeHtml(detail.title || '')}" placeholder="Ex.: Transmissão PGDAS"></label>
+          <label class="form-field"><span>Status</span><select id="fiscal-routine-status">${statusOptions.map((option) => `<option ${detail.status === option ? 'selected' : ''}>${option}</option>`).join('')}</select></label>
+          <label class="form-field"><span>Próximo prazo</span><input id="fiscal-routine-due" value="${escapeHtml(detail.due || '')}" placeholder="Ex.: 20 AGO"></label>
+          <label class="form-field"><span>Responsável</span><input id="fiscal-routine-responsible" value="${escapeHtml(detail.responsible || '')}" placeholder="Ex.: Bianca / Fiscal"></label>
+          <label class="form-field wide"><span>O que precisa ser feito</span><textarea id="fiscal-routine-description" rows="3" placeholder="Descreva o procedimento, documentos e canal de envio.">${escapeHtml(detail.description || '')}</textarea></label>
+        </div>
+        <div class="fiscal-routine-detail-section">
+          <div class="fiscal-routine-detail-heading"><div><p class="form-section-label">Checklist da rotina</p><small>Marque cada etapa conforme o trabalho avançar.</small></div></div>
+          <div class="fiscal-routine-checklist">${checklist.map((item, index) => `<label><input type="checkbox" data-fiscal-check="${index}" data-fiscal-check-text="${escapeHtml(item.text)}" ${item.done ? 'checked' : ''}><span>${escapeHtml(item.text)}</span></label>`).join('')}</div>
+        </div>
+        <div class="fiscal-routine-detail-section">
+          <label class="form-field wide"><span>Observações e informações necessárias</span><textarea id="fiscal-routine-notes" rows="4" placeholder="Registre pendências, número de protocolo, retorno do cliente ou qualquer informação importante.">${escapeHtml(detail.notes || '')}</textarea></label>
+        </div>
+        <div class="fiscal-routine-detail-section fiscal-routine-attachments-section">
+          <div class="fiscal-routine-detail-heading"><div><p class="form-section-label">Anexos da rotina</p><small>Os arquivos ficam salvos neste navegador nesta primeira versão.</small></div></div>
+          <label class="fiscal-routine-upload"><span>＋ Adicionar arquivo</span><input id="fiscal-routine-files" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.xml"></label>
+          <div id="fiscal-routine-pending-files" class="fiscal-routine-pending-files" aria-live="polite"></div>
+          <div class="fiscal-routine-attachments">${attachments.length ? attachments.map((file) => `<div class="fiscal-routine-attachment"><span>▧</span><strong>${escapeHtml(file.name)}</strong><small>${escapeHtml(file.sizeLabel || '')}</small></div>`).join('') : '<p class="fiscal-empty-copy">Nenhum arquivo anexado a esta rotina.</p>'}</div>
+        </div>
+        <p class="form-error" id="fiscal-routine-error" role="alert"></p>
+        <div class="modal-actions"><button class="secondary-button" id="cancel-fiscal-routine" type="button">Cancelar</button><button class="primary-button" id="save-fiscal-routine" type="button">Salvar rotina</button></div>
+      </div>
+    </div>
+  `;
 }
 
 function renderDepartment({ department, moduleData, selectedClient, clients }) {
